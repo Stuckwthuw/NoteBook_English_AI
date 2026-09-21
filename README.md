@@ -81,3 +81,15 @@ NoteBook_English_AI/
 - **Storage**: IndexedDB (thư viện `idb`), LocalStorage
 - **AI Integrations**: Google Generative AI SDK, OpenAI API, Anthropic Claude API
 - **Browser Extension**: Manifest V3 (Chrome & Brave compatible)
+
+---
+
+## 📖 Tài liệu kỹ thuật & Nhật ký phát triển
+
+Dành cho nhà phát triển và các trợ lý AI (AI Coding Assistants):
+
+- 🏛️ **[ARCHITECTURE.md](ARCHITECTURE.md)**: Kiến trúc phần mềm, cấu trúc thư mục, Tech Stack & Lược đồ dữ liệu TypeScript.
+- 🔄 **[WORKFLOW.md](WORKFLOW.md)**: 5 Luồng nghiệp vụ từ tra từ, phân tích AI, tiện ích Extension đến chu kỳ ôn tập ngắt quãng (SRS).
+- 📋 **[BUG.md](BUG.md)**: Tổng hợp các lỗi đã phát sinh từ lúc khởi tạo dự án đến nay.
+- 🛠️ **[BUGDONE.md](BUGDONE.md)**: Nhật ký giải quyết lỗi chi tiết (ngày giờ, nguyên nhân, cách sửa chuẩn & bài học kinh nghiệm).
+
