@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { Search, Sparkles, ExternalLink, Clipboard, Loader2 } from 'lucide-react';
-import type { WordData, AIProvider } from '@/lib/types';
-import { AI_PROVIDERS } from '@/lib/types';
+import type { WordData, AIProvider, AppSettings } from '@/lib/types';
+import { AI_PROVIDERS, DEFAULT_SETTINGS } from '@/lib/types';
 import { useAI } from '@/hooks/useAI';
 import { useToast } from '@/components/ui/Toast';
 import { getSettings } from '@/lib/storage';
@@ -18,15 +18,27 @@ interface AILookupPanelProps {
 export function AILookupPanel({ onResult, initialWord = '', autoOpenPaste = false }: AILookupPanelProps) {
   const [word, setWord] = useState(initialWord);
   const [showPasteModal, setShowPasteModal] = useState(autoOpenPaste);
+  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+  const [mounted, setMounted] = useState(false);
   const { loading, error, result, openFreeChat, analyzeViaAPI, clearResult } = useAI();
   const { toast } = useToast();
-  const settings = getSettings();
+
+  React.useEffect(() => {
+    setMounted(true);
+    setSettings(getSettings());
+  }, []);
+
+  const hasApiKey = mounted && !!(settings.geminiApiKey || settings.openaiApiKey || settings.anthropicApiKey);
+  const isAPIMode = mounted && (settings.aiMode === 'free-api' || settings.aiMode === 'paid-api');
 
   React.useEffect(() => {
     if (initialWord && initialWord.trim()) {
       const clean = initialWord.trim();
       setWord(clean);
-      if (isAPIMode && hasApiKey) {
+      const currentSettings = getSettings();
+      const canAPI = (currentSettings.aiMode === 'free-api' || currentSettings.aiMode === 'paid-api') &&
+        !!(currentSettings.geminiApiKey || currentSettings.openaiApiKey || currentSettings.anthropicApiKey);
+      if (canAPI) {
         analyzeViaAPI(clean).then((data) => {
           if (data) {
             onResult(data);
@@ -74,9 +86,6 @@ export function AILookupPanel({ onResult, initialWord = '', autoOpenPaste = fals
     setShowPasteModal(false);
     toast('Đã nhận kết quả từ AI!', 'success');
   };
-
-  const hasApiKey = settings.geminiApiKey || settings.openaiApiKey || settings.anthropicApiKey;
-  const isAPIMode = settings.aiMode === 'free-api' || settings.aiMode === 'paid-api';
 
   return (
     <div className="animate-fade-in">

@@ -19,11 +19,12 @@ import { useTheme } from '@/hooks/useTheme';
 import { getSettings, saveSettings } from '@/lib/storage';
 import { exportAllData, importData, clearAllData } from '@/lib/db';
 import type { AppSettings, AIMode, AIProvider } from '@/lib/types';
+import { DEFAULT_SETTINGS } from '@/lib/types';
 
 export default function SettingsPage() {
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
-  const [settings, setSettingsState] = useState<AppSettings>(getSettings());
+  const [settings, setSettingsState] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
