@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "Smart Lexicon AI - Tra từ điển nhanh",
+  "version": "1.0.0",
+  "description": "Bôi đen từ tiếng Anh trên bất kỳ trang web nào để tra từ điển AI tức thì qua Chuột phải, Phím tắt Alt+Q hoặc Nút nổi thông minh.",
+  "permissions": [
+    "contextMenus",
+    "activeTab",
+    "scripting"
+  ],
+  "action": {
+    "default_title": "Smart Lexicon AI (Click để mở từ điển)",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "lookup-selection": {
+      "suggested_key": {
+        "default": "Alt+Q",
+        "mac": "Alt+Q"
+      },
+      "description": "Tra từ vựng AI cho đoạn văn bản đang bôi đen"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
