@@ -76,7 +76,7 @@ export function WordCard({ entry, onDelete, onToggleMastered, compact = false }:
             <PronunciationButton word={entry.word} compact={compact} />
           </div>
 
-          <p style={{ fontSize: 14, color: 'var(--fg)', marginTop: 8, lineHeight: 1.5 }}>
+          <p style={{ fontSize: 14, color: 'var(--fg)', marginTop: 8, lineHeight: 1.5, whiteSpace: 'pre-line' }}>
             <span style={{ color: 'var(--primary)', fontWeight: 600 }}>🇻🇳</span>{' '}
             {entry.vietnameseMeaning}
           </p>

@@ -105,13 +105,11 @@ export function parseNaturalLanguageResponse(raw: string, fallbackWord?: string)
   // 1. Trích xuất từ vựng (Word)
   let word = (fallbackWord || '').trim();
   if (!word) {
-    // Thử trích xuất từ **word**
     const boldMatch = text.match(/\*\*([A-Za-z\s\-']+)\*\*/);
     if (boldMatch) {
       word = boldMatch[1].trim();
     } else {
-      // Thử "word là..."
-      const leadingMatch = text.match(/^([A-Za-z\s\-']+?)\s+(?:là|nghĩa là|có nghĩa là|mang nghĩa là)/i);
+      const leadingMatch = text.match(/^([A-Za-z\s\-']+?)\s+(?:là|nghĩa là|có nghĩa là|mang nghĩa|được hiểu là)/i);
       if (leadingMatch) {
         word = leadingMatch[1].trim();
       } else {
@@ -133,104 +131,152 @@ export function parseNaturalLanguageResponse(raw: string, fallbackWord?: string)
   // 3. Trích xuất Loại từ (Part of Speech)
   const partOfSpeech = normalizePartOfSpeech(lowerText);
 
-  // 4. Trích xuất Nghĩa tiếng Việt
-  let vietnameseMeaning = '';
-  const meaningRegexes = [
-    /(?:mang nghĩa là|nghĩa là|có nghĩa là|được hiểu là)\s*[:]?\s*([^.\n]+)/i,
-    /(?:nghĩa tiếng việt|định nghĩa|ý nghĩa)[:\s]+([^.\n]+)/i,
-  ];
-  for (const regex of meaningRegexes) {
-    const match = text.match(regex);
-    if (match) {
-      vietnameseMeaning = match[1].replace(/\*\*/g, '').trim();
-      break;
-    }
-  }
-
-  // 5. Trích xuất Từ đồng nghĩa & Cụm từ đi kèm (Collocations / Synonyms)
-  const collocations: string[] = [];
-  const synMatch = text.match(
-    /(?:từ đồng nghĩa|đồng nghĩa|synonyms?|collocations?|cụm từ đi kèm|cụm từ liên quan)[:\s]+([^\n]+)/i
-  );
-  if (synMatch) {
-    const items = synMatch[1].split(/[,;]/);
-    for (const item of items) {
-      const cleaned = item.replace(/\*\*/g, '').replace(/^[-*•o]\s*/, '').trim();
-      if (cleaned) collocations.push(cleaned);
-    }
-  }
-
-  // 6. Trích xuất Câu ví dụ & Dịch nghĩa (Contexts)
-  const contexts: { domain: string; exampleSentence: string; sentenceMeaning: string }[] = [];
+  // 4. Phân tích các dòng văn bản để bóc tách ngữ cảnh nhiều tầng (Contexts) & Cụm từ (Collocations)
   const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
-  let inExampleSection = false;
+  const contextSections: {
+    domain: string;
+    subMeaning: string;
+    description: string;
+    exampleSentence: string;
+    sentenceMeaning: string;
+  }[] = [];
+
+  let currentSection: {
+    domain: string;
+    subMeaning: string;
+    description: string;
+    exampleSentence: string;
+    sentenceMeaning: string;
+  } | null = null;
+
+  const collocations: string[] = [];
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (/^(?:ví dụ|ví dụ sử dụng|examples?|câu ví dụ)/i.test(line)) {
-      inExampleSection = true;
+
+    // Phát hiện tiêu đề mục ngữ cảnh dạng số:
+    // VD: "1. Trong Kinh doanh và Pháp lý: Pháp nhân, tổ chức"
+    // VD: "1. Công nghệ thông tin: Thực thể dữ liệu"
+    const headerMatch = line.match(/^(\d+)[\.\)]\s*(?:(?:Trong|Về|Lĩnh vực)\s+)?([^:\-–—]+)[:\-–—]\s*(.+)$/i);
+    if (headerMatch) {
+      if (currentSection) {
+        contextSections.push(currentSection);
+      }
+      currentSection = {
+        domain: headerMatch[2].replace(/\*\*/g, '').trim(),
+        subMeaning: headerMatch[3].replace(/\*\*/g, '').trim(),
+        description: '',
+        exampleSentence: '',
+        sentenceMeaning: '',
+      };
       continue;
     }
 
-    // Mẫu 1: Câu tiếng Anh (Bản dịch tiếng Việt)
-    // VD: "o  An indomitable spirit (Một tinh thần bất khuất)."
-    // VD: "The team showed indomitable courage in the final match. (Đội bóng đã thể hiện...)"
-    const exampleWithParens = line.match(/^[-*•o\d.\s]*([A-Za-z0-9\s,'".!?;:\-–—]+?)\s*[\(（](.+?)[\)）]\.?$/);
-    if (exampleWithParens) {
-      let eng = exampleWithParens[1].trim();
-      if (eng.endsWith('.')) eng = eng.slice(0, -1).trim();
-      const vie = exampleWithParens[2].trim();
+    // Phát hiện câu ví dụ:
+    // VD: "o   Ví dụ: The business operates as a separate legal entity. (Doanh nghiệp hoạt động như một pháp nhân pháp lý độc lập.)"
+    // VD: "o   Ví dụ: Trong một ứng dụng quản lý thư viện..."
+    const exMatch = line.match(/^[-*•o\s]*(?:Ví dụ|Example|VD)[:\s]*(.*)$/i);
+    if (exMatch && exMatch[1]) {
+      const exContent = exMatch[1].trim();
+      const lastParenMatch = exContent.match(/^(.*?)\s*[\(（]([^()]+)[\)）][.\s]*$/);
+      let eng = exContent;
+      let vie = currentSection ? currentSection.subMeaning : 'Ví dụ minh họa ngữ cảnh';
 
-      if (eng.split(/\s+/).length >= 2 || (word && eng.toLowerCase().includes(word.toLowerCase()))) {
-        contexts.push({
+      if (lastParenMatch) {
+        const p1 = lastParenMatch[1].trim();
+        const p2 = lastParenMatch[2].trim();
+        const hasVietnamese = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(p1);
+        if (!hasVietnamese && p1.length > 5) {
+          eng = p1;
+          vie = p2;
+        }
+      }
+
+      if (currentSection) {
+        currentSection.exampleSentence = eng;
+        currentSection.sentenceMeaning = vie;
+      } else {
+        contextSections.push({
           domain: 'General',
+          subMeaning: vie,
+          description: '',
           exampleSentence: eng,
           sentenceMeaning: vie,
         });
-        continue;
       }
+      continue;
     }
 
-    // Mẫu 2: Câu tiếng Anh: Bản dịch tiếng Việt hoặc Dấu gạch ngang
-    if (inExampleSection) {
-      const exampleWithSep = line.match(/^[-*•o\d.\s]*([A-Za-z0-9\s,'".!?;:\-–—]+?)\s*[:\-–—]\s*(.+)$/);
-      if (exampleWithSep) {
-        const eng = exampleWithSep[1].trim();
-        const vie = exampleWithSep[2].trim();
-        if (eng.split(/\s+/).length >= 2) {
-          contexts.push({
-            domain: 'General',
-            exampleSentence: eng,
-            sentenceMeaning: vie,
-          });
-          continue;
+    // Phát hiện cụm từ thường gặp / liên quan:
+    // VD: "o   Cụm từ thường gặp: Legal entity (Pháp nhân), Commercial entity (Tổ chức thương mại)."
+    const colloqMatch = line.match(/^[-*•o\s]*(?:Cụm từ thường gặp|Cụm từ liên quan|Cụm từ đi kèm|Collocations?|Synonyms?|Từ đồng nghĩa)[:\s]+(.+)$/i);
+    if (colloqMatch) {
+      const items = colloqMatch[1].split(/[,;]/);
+      for (const item of items) {
+        const cleaned = item.replace(/\*\*/g, '').replace(/[.\s]+$/, '').trim();
+        if (cleaned && cleaned !== '.') {
+          collocations.push(cleaned);
         }
       }
+      continue;
+    }
+
+    // Câu mô tả chi tiết của ngữ cảnh
+    if (currentSection && !line.startsWith('o') && !line.startsWith('-') && !line.startsWith('*')) {
+      if (!currentSection.description) {
+        currentSection.description = line;
+      }
     }
   }
 
-  // Nếu chưa tìm thấy nghĩa nhưng có câu ví dụ, lấy nghĩa từ ví dụ đầu tiên
-  if (!vietnameseMeaning && contexts.length > 0) {
-    vietnameseMeaning = contexts[0].sentenceMeaning;
+  if (currentSection) {
+    contextSections.push(currentSection);
   }
+
+  // 5. Trích xuất Nghĩa cốt lõi & Tổng hợp Nghĩa tiếng Việt
+  let coreMeaning = '';
+  const coreMeaningRegexes = [
+    /(?:mang nghĩa cốt lõi là|nghĩa cốt lõi là|mang nghĩa là|nghĩa là|có nghĩa là|định nghĩa là)\s*[:]?\s*([^.\n]+)/i,
+    /(?:nghĩa tiếng việt|định nghĩa|ý nghĩa)[:\s]+([^.\n]+)/i,
+  ];
+
+  for (const regex of coreMeaningRegexes) {
+    const match = text.match(regex);
+    if (match) {
+      const candidate = match[1].replace(/\*\*/g, '').trim();
+      // Bỏ qua các câu mở đầu chung chung như "cụ thể như sau:", "như sau:"
+      if (!/^(?:cụ thể như sau|như sau|sau đây|dưới đây)[:\s]*$/i.test(candidate)) {
+        coreMeaning = candidate;
+        break;
+      }
+    }
+  }
+
+  let vietnameseMeaning = coreMeaning;
+  if (contextSections.length > 0) {
+    const contextList = contextSections.map((c, i) => `${i + 1}. ${c.domain}: ${c.subMeaning}`).join('\n');
+    if (coreMeaning && !coreMeaning.toLowerCase().includes('cụ thể')) {
+      vietnameseMeaning = `${coreMeaning}\n\nCác ngữ cảnh cụ thể:\n${contextList}`;
+    } else {
+      vietnameseMeaning = contextList;
+    }
+  }
+
   if (!vietnameseMeaning) {
     const firstLine = lines[0] || '';
     vietnameseMeaning = firstLine.replace(/\*\*/g, '').trim();
   }
 
-  // 7. Lưu ý / Ngữ cảnh sử dụng (Common Pitfalls)
+  // 6. Trích xuất Lưu ý / Ngữ cảnh sử dụng (Common Pitfalls)
   let commonPitfalls = '';
   const noteMatch = text.match(/(?:lưu ý|chú ý|cách dùng|lỗi thường gặp|ngữ cảnh)[:\s]+([^\n]+)/i);
   if (noteMatch) {
     commonPitfalls = noteMatch[1].trim();
-  } else {
-    const usageMatch = text.match(/((?:Từ này|Từ vựng này|Nó)\s+thường\s+được\s+dùng[^.\n]+\.?)/i);
-    if (usageMatch) {
-      commonPitfalls = usageMatch[1].trim();
-    }
+  } else if (contextSections.length > 1) {
+    commonPitfalls = `Từ có ${contextSections.length} ngữ cảnh khác nhau (${contextSections.map(c => c.domain).join(', ')}). Cần chú ý dùng đúng ngữ cảnh.`;
   }
 
-  // 8. Ước lượng CEFR
+  // 7. Ước lượng CEFR
   let cefrLevel = 'B2';
   const cefrMatch = text.match(/\b(A1|A2|B1|B2|C1|C2)\b/i);
   if (cefrMatch) {
@@ -247,10 +293,15 @@ export function parseNaturalLanguageResponse(raw: string, fallbackWord?: string)
     cefrLevel,
     register: 'Neutral',
     collocations,
-    contexts,
+    contexts: contextSections.map((c) => ({
+      domain: c.domain,
+      exampleSentence: c.exampleSentence || c.description || c.subMeaning,
+      sentenceMeaning: c.sentenceMeaning || c.subMeaning,
+    })),
     commonPitfalls: commonPitfalls || 'Chú ý ngữ cảnh sử dụng phù hợp.',
   };
 }
+
 
 function normalizePartOfSpeech(text: string): string {
   const lower = text.toLowerCase();
