@@ -75,13 +75,32 @@ function sanitizeParsedJSON(data: Record<string, unknown>, fallbackWord?: string
   const word = String(data.word || fallbackWord || '').trim();
   const vietnameseMeaning = String(data.vietnameseMeaning || data.meaning || '').trim();
 
+  // Word Family
+  const wordFamily = Array.isArray(data.wordFamily)
+    ? data.wordFamily
+        .filter((item) => item && typeof item === 'object')
+        .map((item: Record<string, unknown>) => ({
+          word: String(item.word || '').trim(),
+          partOfSpeech: String(item.partOfSpeech || item.pos || '').trim(),
+          meaning: String(item.meaning || item.vietnameseMeaning || '').trim(),
+        }))
+        .filter((item) => item.word && item.meaning)
+    : [];
+
+  // Synonyms & Antonyms
+  const synonyms = Array.isArray(data.synonyms) ? data.synonyms.map(String).filter(Boolean) : [];
+  const antonyms = Array.isArray(data.antonyms) ? data.antonyms.map(String).filter(Boolean) : [];
+
   return {
     word: word || 'New Word',
     ipa: String(data.ipa || ''),
-    partOfSpeech: normalizePartOfSpeech(String(data.partOfSpeech || 'noun')),
+    partOfSpeech: normalizePartOfSpeech(String(data.partOfSpeech || 'noun'), word),
     vietnameseMeaning: vietnameseMeaning || 'Nghĩa từ vựng',
     cefrLevel: normalizeCEFR(String(data.cefrLevel || 'B1')),
     register: String(data.register || 'Neutral'),
+    wordFamily: wordFamily.length > 0 ? wordFamily : undefined,
+    synonyms: synonyms.length > 0 ? synonyms : undefined,
+    antonyms: antonyms.length > 0 ? antonyms : undefined,
     collocations: Array.isArray(data.collocations) ? data.collocations.map(String) : [],
     contexts: Array.isArray(data.contexts)
       ? data.contexts.map((ctx: Record<string, unknown>) => ({
@@ -96,7 +115,6 @@ function sanitizeParsedJSON(data: Record<string, unknown>, fallbackWord?: string
 
 /**
  * Trích xuất cấu trúc WordData từ văn bản tự do của AI
- * Ví dụ: Chatbot trả về "Indomitable là tính từ mang nghĩa là bất khuất... Ví dụ sử dụng: - An indomitable spirit (Một tinh thần bất khuất)..."
  */
 export function parseNaturalLanguageResponse(raw: string, fallbackWord?: string): WordData {
   const text = raw.trim();
@@ -129,9 +147,9 @@ export function parseNaturalLanguageResponse(raw: string, fallbackWord?: string)
   }
 
   // 3. Trích xuất Loại từ (Part of Speech)
-  const partOfSpeech = normalizePartOfSpeech(lowerText);
+  const partOfSpeech = normalizePartOfSpeech(lowerText, word);
 
-  // 4. Phân tích các dòng văn bản để bóc tách ngữ cảnh nhiều tầng (Contexts) & Cụm từ (Collocations)
+  // 4. Phân tích các dòng văn bản để bóc tách ngữ cảnh (Contexts), Gia đình từ (Word Family) & Đồng nghĩa (Synonyms)
   const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
   const contextSections: {
     domain: string;
@@ -150,13 +168,75 @@ export function parseNaturalLanguageResponse(raw: string, fallbackWord?: string)
   } | null = null;
 
   const collocations: string[] = [];
+  const wordFamily: { word: string; partOfSpeech: string; meaning: string }[] = [];
+  const synonyms: string[] = [];
+  const antonyms: string[] = [];
+  let inFamilySection = false;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
+    // Phát hiện bắt đầu mục Gia đình từ (Word Family)
+    if (/^(?:[-*•o\s]*)(?:gia đình từ|word family|họ từ|các dạng từ|word forms)[:\s]*/i.test(line)) {
+      inFamilySection = true;
+      continue;
+    }
+
+    // Thoát khỏi mục Gia đình từ khi gặp mục khác
+    if (/^(?:[-*•o\s]*)(?:từ đồng nghĩa|đồng nghĩa|synonyms?|từ trái nghĩa|trái nghĩa|antonyms?|collocations?|cụm từ|lưu ý|ngữ cảnh)/i.test(line)) {
+      inFamilySection = false;
+    }
+
+    // Xử lý các dòng trong mục Gia đình từ
+    if (inFamilySection) {
+      // Dạng 1: - correspond (verb): tương ứng, trao đổi thư từ
+      // Dạng 2: • correspondence (noun) - thư từ
+      const famMatch = line.match(/^[-*•+o\s]*([A-Za-z\-']+)\s*[\(（]([a-zA-Z\s\.\/]+)[\)）][: \-–—]+\s*(.+)$/i);
+      if (famMatch) {
+        wordFamily.push({
+          word: famMatch[1].trim(),
+          partOfSpeech: famMatch[2].trim().toLowerCase(),
+          meaning: famMatch[3].trim(),
+        });
+        continue;
+      }
+
+      // Dạng 3: - Verb: correspond (tương ứng)
+      const famMatch2 = line.match(/^[-*•+o\s]*([a-zA-Z]+)[: \-–—]+([A-Za-z\-']+)\s*[\(（](.+?)[\)）]$/i);
+      if (famMatch2) {
+        wordFamily.push({
+          word: famMatch2[2].trim(),
+          partOfSpeech: famMatch2[1].trim().toLowerCase(),
+          meaning: famMatch2[3].trim(),
+        });
+        continue;
+      }
+    }
+
+    // Phát hiện Từ đồng nghĩa (Synonyms)
+    const synMatch = line.match(/^[-*•+o\s]*(?:từ đồng nghĩa|đồng nghĩa|synonyms?)(?:\s*[\(（][^\)）]+[\)）])?[:\s]+(.+)$/i);
+    if (synMatch) {
+      const parts = synMatch[1].split(/[,;]/);
+      for (const p of parts) {
+        const clean = p.replace(/\*\*/g, '').replace(/[.\s]+$/, '').trim();
+        if (clean) synonyms.push(clean);
+      }
+      continue;
+    }
+
+    // Phát hiện Từ trái nghĩa (Antonyms)
+    const antMatch = line.match(/^[-*•+o\s]*(?:từ trái nghĩa|trái nghĩa|antonyms?)(?:\s*[\(（][^\)）]+[\)）])?[:\s]+(.+)$/i);
+    if (antMatch) {
+      const parts = antMatch[1].split(/[,;]/);
+      for (const p of parts) {
+        const clean = p.replace(/\*\*/g, '').replace(/[.\s]+$/, '').trim();
+        if (clean) antonyms.push(clean);
+      }
+      continue;
+    }
+
     // Phát hiện tiêu đề mục ngữ cảnh dạng số:
     // VD: "1. Trong Kinh doanh và Pháp lý: Pháp nhân, tổ chức"
-    // VD: "1. Công nghệ thông tin: Thực thể dữ liệu"
     const headerMatch = line.match(/^(\d+)[\.\)]\s*(?:(?:Trong|Về|Lĩnh vực)\s+)?([^:\-–—]+)[:\-–—]\s*(.+)$/i);
     if (headerMatch) {
       if (currentSection) {
@@ -173,8 +253,6 @@ export function parseNaturalLanguageResponse(raw: string, fallbackWord?: string)
     }
 
     // Phát hiện câu ví dụ:
-    // VD: "o   Ví dụ: The business operates as a separate legal entity. (Doanh nghiệp hoạt động như một pháp nhân pháp lý độc lập.)"
-    // VD: "o   Ví dụ: Trong một ứng dụng quản lý thư viện..."
     const exMatch = line.match(/^[-*•o\s]*(?:Ví dụ|Example|VD)[:\s]*(.*)$/i);
     if (exMatch && exMatch[1]) {
       const exContent = exMatch[1].trim();
@@ -207,9 +285,8 @@ export function parseNaturalLanguageResponse(raw: string, fallbackWord?: string)
       continue;
     }
 
-    // Phát hiện cụm từ thường gặp / liên quan:
-    // VD: "o   Cụm từ thường gặp: Legal entity (Pháp nhân), Commercial entity (Tổ chức thương mại)."
-    const colloqMatch = line.match(/^[-*•o\s]*(?:Cụm từ thường gặp|Cụm từ liên quan|Cụm từ đi kèm|Collocations?|Synonyms?|Từ đồng nghĩa)[:\s]+(.+)$/i);
+    // Phát hiện cụm từ thường gặp / liên quan (Collocations):
+    const colloqMatch = line.match(/^[-*•o\s]*(?:Cụm từ thường gặp|Cụm từ liên quan|Cụm từ đi kèm|Collocations?)[:\s]+(.+)$/i);
     if (colloqMatch) {
       const items = colloqMatch[1].split(/[,;]/);
       for (const item of items) {
@@ -222,7 +299,7 @@ export function parseNaturalLanguageResponse(raw: string, fallbackWord?: string)
     }
 
     // Câu mô tả chi tiết của ngữ cảnh
-    if (currentSection && !line.startsWith('o') && !line.startsWith('-') && !line.startsWith('*')) {
+    if (currentSection && !line.startsWith('o') && !line.startsWith('-') && !line.startsWith('*') && !inFamilySection) {
       if (!currentSection.description) {
         currentSection.description = line;
       }
@@ -236,7 +313,7 @@ export function parseNaturalLanguageResponse(raw: string, fallbackWord?: string)
   // 5. Trích xuất Nghĩa cốt lõi & Tổng hợp Nghĩa tiếng Việt
   let coreMeaning = '';
   const coreMeaningRegexes = [
-    /(?:mang nghĩa cốt lõi là|nghĩa cốt lõi là|mang nghĩa là|nghĩa là|có nghĩa là|định nghĩa là)\s*[:]?\s*([^.\n]+)/i,
+    /(?:mang nghĩa cốt lõi là|nghĩa cốt lõi là|mang nghĩa là|nghĩa là|có nghĩa là|định nghĩa là|nghĩa chính[:\s]+)\s*[:]?\s*([^.\n]+)/i,
     /(?:nghĩa tiếng việt|định nghĩa|ý nghĩa)[:\s]+([^.\n]+)/i,
   ];
 
@@ -244,8 +321,8 @@ export function parseNaturalLanguageResponse(raw: string, fallbackWord?: string)
     const match = text.match(regex);
     if (match) {
       const candidate = match[1].replace(/\*\*/g, '').trim();
-      // Bỏ qua các câu mở đầu chung chung như "cụ thể như sau:", "như sau:"
-      if (!/^(?:cụ thể như sau|như sau|sau đây|dưới đây)[:\s]*$/i.test(candidate)) {
+      // Bỏ qua các câu mở đầu chung chung
+      if (!/^(?:cụ thể như sau|như sau|sau đây|dưới đây|chính tùy thuộc vào ngữ cảnh|tùy thuộc vào|tùy vào|phụ thuộc vào)[:\s]*$/i.test(candidate)) {
         coreMeaning = candidate;
         break;
       }
@@ -255,7 +332,7 @@ export function parseNaturalLanguageResponse(raw: string, fallbackWord?: string)
   let vietnameseMeaning = coreMeaning;
   if (contextSections.length > 0) {
     const contextList = contextSections.map((c, i) => `${i + 1}. ${c.domain}: ${c.subMeaning}`).join('\n');
-    if (coreMeaning && !coreMeaning.toLowerCase().includes('cụ thể')) {
+    if (coreMeaning && !coreMeaning.toLowerCase().includes('tùy thuộc') && !coreMeaning.toLowerCase().includes('cụ thể')) {
       vietnameseMeaning = `${coreMeaning}\n\nCác ngữ cảnh cụ thể:\n${contextList}`;
     } else {
       vietnameseMeaning = contextList;
@@ -292,6 +369,9 @@ export function parseNaturalLanguageResponse(raw: string, fallbackWord?: string)
     vietnameseMeaning: vietnameseMeaning || 'Nghĩa từ vựng',
     cefrLevel,
     register: 'Neutral',
+    wordFamily: wordFamily.length > 0 ? wordFamily : undefined,
+    synonyms: synonyms.length > 0 ? synonyms : undefined,
+    antonyms: antonyms.length > 0 ? antonyms : undefined,
     collocations,
     contexts: contextSections.map((c) => ({
       domain: c.domain,
@@ -302,18 +382,26 @@ export function parseNaturalLanguageResponse(raw: string, fallbackWord?: string)
   };
 }
 
-
-function normalizePartOfSpeech(text: string): string {
+function normalizePartOfSpeech(text: string, word = ''): string {
   const lower = text.toLowerCase();
-  if (lower.includes('tính từ') || lower.includes('adjective') || lower.includes('adj')) return 'adjective';
+  if (lower.includes('động từ') || lower.includes('verb') || lower.includes('v.') || lower.includes('dạng chia') || lower.includes('chia ngôi')) return 'verb';
   if (lower.includes('danh từ') || lower.includes('noun') || lower.includes('n.')) return 'noun';
-  if (lower.includes('động từ') || lower.includes('verb') || lower.includes('v.')) return 'verb';
+  if (lower.includes('tính từ') || lower.includes('adjective') || lower.includes('adj')) return 'adjective';
   if (lower.includes('trạng từ') || lower.includes('phó từ') || lower.includes('adverb') || lower.includes('adv')) return 'adverb';
   if (lower.includes('thành ngữ') || lower.includes('idiom')) return 'idiom';
   if (lower.includes('cụm từ') || lower.includes('phrase')) return 'phrase';
   if (lower.includes('giới từ') || lower.includes('preposition')) return 'preposition';
   if (lower.includes('liên từ') || lower.includes('conjunction')) return 'conjunction';
-  return 'adjective';
+
+  // Heuristic dựa vào hậu tố của từ
+  const w = word.toLowerCase();
+  if (w.endsWith('tion') || w.endsWith('ment') || w.endsWith('ness') || w.endsWith('ity') || w.endsWith('ence') || w.endsWith('ance')) return 'noun';
+  if (w.endsWith('able') || w.endsWith('ible') || w.endsWith('ful') || w.endsWith('less') || w.endsWith('ous') || w.endsWith('ive')) return 'adjective';
+  if (w.endsWith('ly')) return 'adverb';
+  if (w.endsWith('ing') || w.endsWith('ed') || w.endsWith('ize') || w.endsWith('ise') || w.endsWith('ate') || w.endsWith('ify')) return 'verb';
+  if (w.endsWith('s') && w.length > 4) return 'verb';
+
+  return 'noun';
 }
 
 function normalizeCEFR(level: string): string {
@@ -321,3 +409,4 @@ function normalizeCEFR(level: string): string {
   const valid = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'B2/C1'];
   return valid.includes(upper) ? upper : 'B1';
 }
+

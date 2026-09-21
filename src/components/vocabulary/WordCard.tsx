@@ -10,6 +10,8 @@ import {
   BookOpen,
   AlertTriangle,
   Layers,
+  GitBranch,
+  ArrowLeftRight,
 } from 'lucide-react';
 import type { VocabularyEntry } from '@/lib/types';
 import { CEFRBadge } from './CEFRBadge';
@@ -22,9 +24,11 @@ interface WordCardProps {
   compact?: boolean;
 }
 
+type TabType = 'contexts' | 'family' | 'synonyms' | 'collocations' | 'pitfalls';
+
 export function WordCard({ entry, onDelete, onToggleMastered, compact = false }: WordCardProps) {
   const [expanded, setExpanded] = useState(!compact);
-  const [activeTab, setActiveTab] = useState<'collocations' | 'contexts' | 'pitfalls'>('contexts');
+  const [activeTab, setActiveTab] = useState<TabType>('contexts');
 
   return (
     <div
@@ -157,11 +161,26 @@ export function WordCard({ entry, onDelete, onToggleMastered, compact = false }:
       {expanded && (
         <div style={{ marginTop: 16, borderTop: '1px solid var(--border-light)', paddingTop: 16 }}>
           {/* Tab Navigation */}
-          <div style={{ display: 'flex', gap: 4, marginBottom: 14 }}>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
             {[
-              { key: 'contexts' as const, label: 'Ngữ cảnh', icon: BookOpen },
-              { key: 'collocations' as const, label: 'Collocations', icon: Layers },
-              { key: 'pitfalls' as const, label: 'Lưu ý', icon: AlertTriangle },
+              { key: 'contexts' as const, label: 'Ngữ cảnh', icon: BookOpen, count: entry.contexts?.length },
+              ...(entry.wordFamily && entry.wordFamily.length > 0
+                ? [{ key: 'family' as const, label: 'Gia đình từ', icon: GitBranch, count: entry.wordFamily.length }]
+                : []),
+              ...((entry.synonyms && entry.synonyms.length > 0) || (entry.antonyms && entry.antonyms.length > 0)
+                ? [{
+                    key: 'synonyms' as const,
+                    label: 'Đồng nghĩa & Trái nghĩa',
+                    icon: ArrowLeftRight,
+                    count: (entry.synonyms?.length || 0) + (entry.antonyms?.length || 0),
+                  }]
+                : []),
+              ...(entry.collocations && entry.collocations.length > 0
+                ? [{ key: 'collocations' as const, label: 'Collocations', icon: Layers, count: entry.collocations.length }]
+                : []),
+              ...(entry.commonPitfalls
+                ? [{ key: 'pitfalls' as const, label: 'Lưu ý', icon: AlertTriangle }]
+                : []),
             ].map((tab) => (
               <button
                 key={tab.key}
@@ -169,7 +188,7 @@ export function WordCard({ entry, onDelete, onToggleMastered, compact = false }:
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 5,
+                  gap: 6,
                   padding: '6px 12px',
                   borderRadius: 8,
                   border: 'none',
@@ -182,12 +201,26 @@ export function WordCard({ entry, onDelete, onToggleMastered, compact = false }:
                 }}
               >
                 <tab.icon size={13} />
-                {tab.label}
+                <span>{tab.label}</span>
+                {tab.count !== undefined && tab.count > 0 && (
+                  <span
+                    style={{
+                      fontSize: 10,
+                      padding: '1px 5px',
+                      borderRadius: 10,
+                      background: activeTab === tab.key ? 'var(--primary)' : 'var(--surface-alt)',
+                      color: activeTab === tab.key ? 'white' : 'var(--muted-fg)',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {tab.count}
+                  </span>
+                )}
               </button>
             ))}
           </div>
 
-          {/* Tab Content */}
+          {/* Tab Content: Ngữ cảnh */}
           {activeTab === 'contexts' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {entry.contexts.map((ctx, i) => (
@@ -214,6 +247,106 @@ export function WordCard({ entry, onDelete, onToggleMastered, compact = false }:
             </div>
           )}
 
+          {/* Tab Content: Gia đình từ (Word Family) */}
+          {activeTab === 'family' && entry.wordFamily && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
+              {entry.wordFamily.map((fam, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    padding: '10px 12px',
+                    borderRadius: 10,
+                    background: 'var(--surface-alt)',
+                    border: '1px solid var(--border-light)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 4,
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--fg)', fontFamily: 'var(--font-display)' }}>
+                      {fam.word}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 600,
+                        padding: '2px 6px',
+                        borderRadius: 6,
+                        background: 'var(--primary-soft)',
+                        color: 'var(--primary)',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {fam.partOfSpeech}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 12, color: 'var(--muted-fg)', margin: 0, lineHeight: 1.4 }}>
+                    {fam.meaning}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Tab Content: Đồng nghĩa & Trái nghĩa */}
+          {activeTab === 'synonyms' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {entry.synonyms && entry.synonyms.length > 0 && (
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#10b981', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span>🟢</span> Từ đồng nghĩa (Synonyms)
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {entry.synonyms.map((syn, idx) => (
+                      <span
+                        key={idx}
+                        style={{
+                          padding: '5px 12px',
+                          borderRadius: 8,
+                          background: 'rgba(16, 185, 129, 0.12)',
+                          border: '1px solid rgba(16, 185, 129, 0.3)',
+                          fontSize: 13,
+                          color: '#10b981',
+                          fontWeight: 500,
+                        }}
+                      >
+                        {syn}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {entry.antonyms && entry.antonyms.length > 0 && (
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#f43f5e', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span>🔴</span> Từ trái nghĩa (Antonyms)
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {entry.antonyms.map((ant, idx) => (
+                      <span
+                        key={idx}
+                        style={{
+                          padding: '5px 12px',
+                          borderRadius: 8,
+                          background: 'rgba(244, 63, 94, 0.12)',
+                          border: '1px solid rgba(244, 63, 94, 0.3)',
+                          fontSize: 13,
+                          color: '#f43f5e',
+                          fontWeight: 500,
+                        }}
+                      >
+                        {ant}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Tab Content: Collocations */}
           {activeTab === 'collocations' && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {entry.collocations.map((col, i) => (
@@ -235,6 +368,7 @@ export function WordCard({ entry, onDelete, onToggleMastered, compact = false }:
             </div>
           )}
 
+          {/* Tab Content: Lưu ý */}
           {activeTab === 'pitfalls' && entry.commonPitfalls && (
             <div
               style={{
@@ -255,6 +389,7 @@ export function WordCard({ entry, onDelete, onToggleMastered, compact = false }:
               </p>
             </div>
           )}
+
         </div>
       )}
     </div>

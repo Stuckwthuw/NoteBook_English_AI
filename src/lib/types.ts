@@ -8,6 +8,12 @@ export interface WordContext {
   sentenceMeaning: string;
 }
 
+export interface WordFamilyMember {
+  word: string;
+  partOfSpeech: string;
+  meaning: string;
+}
+
 export interface WordData {
   word: string;
   ipa: string;
@@ -18,6 +24,9 @@ export interface WordData {
   collocations: string[];
   contexts: WordContext[];
   commonPitfalls: string;
+  wordFamily?: WordFamilyMember[];
+  synonyms?: string[];
+  antonyms?: string[];
 }
 
 export interface VocabularyEntry extends WordData {
