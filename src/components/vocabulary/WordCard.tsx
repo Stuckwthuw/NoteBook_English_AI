@@ -21,14 +21,16 @@ interface WordCardProps {
   entry: VocabularyEntry;
   onDelete?: (id: string) => void;
   onToggleMastered?: (id: string) => void;
+  onUpdate?: (updated: VocabularyEntry) => void;
   compact?: boolean;
 }
 
 type TabType = 'contexts' | 'family' | 'synonyms' | 'collocations' | 'pitfalls';
 
-export function WordCard({ entry, onDelete, onToggleMastered, compact = false }: WordCardProps) {
+export function WordCard({ entry, onDelete, onToggleMastered, onUpdate, compact = false }: WordCardProps) {
   const [expanded, setExpanded] = useState(!compact);
   const [activeTab, setActiveTab] = useState<TabType>('contexts');
+  const [isEditingPOS, setIsEditingPOS] = useState(false);
 
   return (
     <div
@@ -54,18 +56,64 @@ export function WordCard({ entry, onDelete, onToggleMastered, compact = false }:
               {entry.word}
             </h3>
             <CEFRBadge level={entry.cefrLevel} size={compact ? 'sm' : 'md'} />
-            <span
-              style={{
-                fontSize: 11,
-                padding: '2px 8px',
-                borderRadius: 6,
-                background: 'var(--surface-alt)',
-                color: 'var(--muted-fg)',
-                fontWeight: 500,
-              }}
-            >
-              {entry.partOfSpeech}
-            </span>
+            
+            {isEditingPOS ? (
+              <select
+                value={entry.partOfSpeech}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  setIsEditingPOS(false);
+                  if (onUpdate) {
+                    onUpdate({ ...entry, partOfSpeech: e.target.value });
+                  }
+                }}
+                onBlur={() => setIsEditingPOS(false)}
+                autoFocus
+                style={{
+                  fontSize: 11,
+                  padding: '2px 6px',
+                  borderRadius: 6,
+                  background: 'var(--surface)',
+                  color: 'var(--primary)',
+                  border: '1px solid var(--primary)',
+                  fontWeight: 600,
+                  outline: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                <option value="noun">noun (danh từ)</option>
+                <option value="verb">verb (động từ)</option>
+                <option value="adjective">adjective (tính từ)</option>
+                <option value="adverb">adverb (trạng từ)</option>
+                <option value="idiom">idiom (thành ngữ)</option>
+                <option value="phrase">phrase (cụm từ)</option>
+              </select>
+            ) : (
+              <span
+                onClick={(e) => {
+                  if (onUpdate) {
+                    e.stopPropagation();
+                    setIsEditingPOS(true);
+                  }
+                }}
+                title={onUpdate ? 'Nhấp để sửa loại từ (Noun, Verb, Adj, Adv...)' : undefined}
+                style={{
+                  fontSize: 11,
+                  padding: '2px 8px',
+                  borderRadius: 6,
+                  background: 'var(--surface-alt)',
+                  color: 'var(--muted-fg)',
+                  fontWeight: 500,
+                  cursor: onUpdate ? 'pointer' : 'default',
+                  transition: 'all 0.2s',
+                  border: onUpdate ? '1px dashed var(--border-color)' : 'none',
+                }}
+              >
+                {entry.partOfSpeech} {onUpdate && '✎'}
+              </span>
+            )}
+
             {entry.isMastered && (
               <span style={{ fontSize: 11, color: 'var(--success-color)', fontWeight: 600 }}>
                 ✓ Đã thuộc

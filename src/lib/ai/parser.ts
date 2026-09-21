@@ -382,24 +382,93 @@ export function parseNaturalLanguageResponse(raw: string, fallbackWord?: string)
   };
 }
 
-function normalizePartOfSpeech(text: string, word = ''): string {
-  const lower = text.toLowerCase();
-  if (lower.includes('động từ') || lower.includes('verb') || lower.includes('v.') || lower.includes('dạng chia') || lower.includes('chia ngôi')) return 'verb';
-  if (lower.includes('danh từ') || lower.includes('noun') || lower.includes('n.')) return 'noun';
-  if (lower.includes('tính từ') || lower.includes('adjective') || lower.includes('adj')) return 'adjective';
-  if (lower.includes('trạng từ') || lower.includes('phó từ') || lower.includes('adverb') || lower.includes('adv')) return 'adverb';
-  if (lower.includes('thành ngữ') || lower.includes('idiom')) return 'idiom';
-  if (lower.includes('cụm từ') || lower.includes('phrase')) return 'phrase';
-  if (lower.includes('giới từ') || lower.includes('preposition')) return 'preposition';
-  if (lower.includes('liên từ') || lower.includes('conjunction')) return 'conjunction';
+export function normalizePartOfSpeech(posOrText: string, word = ''): string {
+  const str = (posOrText || '').trim().toLowerCase();
 
-  // Heuristic dựa vào hậu tố của từ
-  const w = word.toLowerCase();
-  if (w.endsWith('tion') || w.endsWith('ment') || w.endsWith('ness') || w.endsWith('ity') || w.endsWith('ence') || w.endsWith('ance')) return 'noun';
-  if (w.endsWith('able') || w.endsWith('ible') || w.endsWith('ful') || w.endsWith('less') || w.endsWith('ous') || w.endsWith('ive')) return 'adjective';
-  if (w.endsWith('ly')) return 'adverb';
-  if (w.endsWith('ing') || w.endsWith('ed') || w.endsWith('ize') || w.endsWith('ise') || w.endsWith('ate') || w.endsWith('ify')) return 'verb';
-  if (w.endsWith('s') && w.length > 4) return 'verb';
+  // 1. Kiểm tra trực tiếp các nhãn loại từ chuẩn ngắn gọn
+  if (str === 'noun' || str === 'danh từ' || str === 'n' || str === 'n.') return 'noun';
+  if (str === 'verb' || str === 'động từ' || str === 'v' || str === 'v.') return 'verb';
+  if (str === 'adjective' || str === 'tính từ' || str === 'adj' || str === 'adj.') return 'adjective';
+  if (str === 'adverb' || str === 'trạng từ' || str === 'phó từ' || str === 'adv' || str === 'adv.') return 'adverb';
+  if (str === 'idiom' || str === 'thành ngữ') return 'idiom';
+  if (str === 'phrase' || str === 'cụm từ') return 'phrase';
+  if (str === 'preposition' || str === 'giới từ') return 'preposition';
+  if (str === 'conjunction' || str === 'liên từ') return 'conjunction';
+
+  // 2. Nếu chuỗi truyền vào là một đoạn văn bản hoặc câu giải thích
+  return detectPartOfSpeechFromText(posOrText, word);
+}
+
+export function detectPartOfSpeechFromText(text: string, word = ''): string {
+  const w = word.toLowerCase().trim();
+  const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
+  const firstLines = lines.slice(0, 3).join(' ').toLowerCase();
+
+  // 1. Kiểm tra trường rõ ràng "Loại từ: Danh từ" hoặc "Part of speech: noun"
+  const explicitMatch = text.match(/(?:loại từ|từ loại|part of speech)[:\s]+([^\n.,]+)/i);
+  if (explicitMatch) {
+    const posStr = explicitMatch[1].toLowerCase();
+    if (posStr.includes('danh') || posStr.includes('noun') || posStr.includes('n.')) return 'noun';
+    if (posStr.includes('động') || posStr.includes('verb') || posStr.includes('v.')) return 'verb';
+    if (posStr.includes('tính') || posStr.includes('adj')) return 'adjective';
+    if (posStr.includes('trạng') || posStr.includes('adv')) return 'adverb';
+  }
+
+  // 2. Kiểm tra câu mở đầu trực tiếp của từ:
+  // "Detection là danh từ...", "Correspond là động từ..."
+  const directIntroRegex = new RegExp(`^(?:\\*\\*)?${w}(?:\\*\\*)?\\s+là\\s+(?:một\\s+)?(danh từ|động từ|tính từ|trạng từ|noun|verb|adjective|adverb)`, 'i');
+  const directMatch = firstLines.match(directIntroRegex);
+  if (directMatch) {
+    const pos = directMatch[1].toLowerCase();
+    if (pos.includes('danh') || pos.includes('noun')) return 'noun';
+    if (pos.includes('động') || pos.includes('verb')) return 'verb';
+    if (pos.includes('tính') || pos.includes('adj')) return 'adjective';
+    if (pos.includes('trạng') || pos.includes('adv')) return 'adverb';
+  }
+
+  // Dạng chia động từ: "Corresponds là dạng chia của động từ correspond..."
+  const verbConjugationMatch = firstLines.match(/(?:dạng chia|chia ngôi|ngôi thứ|quá khứ|phân từ)\s*(?:của\s+)?(?:động từ|verb)/i);
+  if (verbConjugationMatch) {
+    return 'verb';
+  }
+
+  // 3. Phân tích hình thái hậu tố (Suffix Morphology) - cực kỳ chuẩn xác trong tiếng Anh
+  // Danh từ: -tion, -sion, -ment, -ness, -ity, -ance, -ence, -ship, -hood, -dom, -ism, -ist, -ure
+  if (/(?:tion|sion|ment|ness|ity|ance|ence|ship|hood|dom|ism|ist|ure|logy|graphy)$/i.test(w)) {
+    return 'noun';
+  }
+
+  // Tính từ: -able, -ible, -al, -ful, -less, -ous, -ious, -ic, -ive, -ish
+  if (/(?:able|ible|ful|less|ous|ious|ic|ive|ish)$/i.test(w)) {
+    return 'adjective';
+  }
+
+  // Trạng từ: -ly (trừ friendly, lovely, lonely...)
+  if (w.endsWith('ly') && w.length > 3 && !['friendly', 'lovely', 'lonely', 'ugly', 'silly', 'lively'].includes(w)) {
+    return 'adverb';
+  }
+
+  // Động từ: -ize, -ise, -ate, -ify, hoặc dạng chia -ed
+  if (/(?:ize|ise|ate|ify|ed)$/i.test(w)) {
+    return 'verb';
+  }
+
+  // Động từ chia ngôi số ít đuôi -s (khi trong bài có nhắc đến verb/động từ)
+  if (w.endsWith('s') && w.length > 4 && (firstLines.includes('động từ') || firstLines.includes('verb'))) {
+    return 'verb';
+  }
+
+  // 4. Dấu hiệu ngữ nghĩa tiếng Việt ở câu định nghĩa:
+  // "sự phát hiện", "việc thực hiện", "khả năng..." -> Danh từ
+  if (/^(?:sự|việc|cuộc|niềm|nỗi|khả năng|tính chất)\s+/i.test(firstLines) || text.includes('nghĩa là sự ') || text.includes('là sự ')) {
+    return 'noun';
+  }
+
+  // Fallback từ câu đầu tiên nếu có nhắc đến từ loại
+  if (firstLines.includes('danh từ')) return 'noun';
+  if (firstLines.includes('động từ')) return 'verb';
+  if (firstLines.includes('tính từ')) return 'adjective';
+  if (firstLines.includes('trạng từ')) return 'adverb';
 
   return 'noun';
 }
@@ -409,4 +478,5 @@ function normalizeCEFR(level: string): string {
   const valid = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'B2/C1'];
   return valid.includes(upper) ? upper : 'B1';
 }
+
 

@@ -52,6 +52,17 @@ export function useVocabulary() {
     [loadWords]
   );
 
+  const updateWord = useCallback(
+    async (updatedEntry: VocabularyEntry) => {
+      await db.updateWord({
+        ...updatedEntry,
+        updatedAt: Date.now(),
+      });
+      await loadWords();
+    },
+    [loadWords]
+  );
+
   const toggleMastered = useCallback(
     async (id: string) => {
       const word = words.find((w) => w.id === id);
@@ -120,6 +131,7 @@ export function useVocabulary() {
     stats,
     addWord,
     removeWord,
+    updateWord,
     toggleMastered,
     markReviewed,
     refresh: loadWords,

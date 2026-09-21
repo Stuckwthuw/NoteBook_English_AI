@@ -8,7 +8,7 @@ import { WordCard } from '@/components/vocabulary/WordCard';
 import { CEFR_LEVELS } from '@/lib/types';
 
 export default function VocabularyPage() {
-  const { words, loading, removeWord, toggleMastered } = useVocabulary();
+  const { words, loading, removeWord, toggleMastered, updateWord } = useVocabulary();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCEFR, setFilterCEFR] = useState('');
@@ -198,6 +198,7 @@ export default function VocabularyPage() {
                 compact
                 onDelete={removeWord}
                 onToggleMastered={toggleMastered}
+                onUpdate={updateWord}
               />
             </div>
           ))}

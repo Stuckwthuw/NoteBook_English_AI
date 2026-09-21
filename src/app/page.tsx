@@ -17,7 +17,7 @@ import { CEFRBadge } from '@/components/vocabulary/CEFRBadge';
 import { WordCard } from '@/components/vocabulary/WordCard';
 
 export default function DashboardPage() {
-  const { words, stats, loading, toggleMastered, removeWord } = useVocabulary();
+  const { words, stats, loading, toggleMastered, removeWord, updateWord } = useVocabulary();
 
   const recentWords = words.slice(0, 3);
 
@@ -198,6 +198,7 @@ export default function DashboardPage() {
                 compact
                 onDelete={removeWord}
                 onToggleMastered={toggleMastered}
+                onUpdate={updateWord}
               />
             ))}
           </div>
