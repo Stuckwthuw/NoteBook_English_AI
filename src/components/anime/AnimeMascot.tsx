@@ -6,11 +6,13 @@ import { useMascot } from '@/context/MascotContext';
 import { Sparkles, MessageCircle, X, Heart, Volume2, Shield } from 'lucide-react';
 import { LiveAnimeCharacter } from './LiveAnimeCharacter';
 import { ThreeAnimeCharacter } from './ThreeAnimeCharacter';
+import { ModelAnime3D } from './ModelAnime3D';
 import { triggerSakuraShower } from '@/lib/confetti';
 
 export function AnimeMascot() {
   const { emotion, message, isMascotVisible, interact, toggleVisibility } = useMascot();
   const [isOpen, setIsOpen] = useState(false);
+  const [renderMode, setRenderMode] = useState<'2.5d' | '3d'>('2.5d');
 
   if (!isMascotVisible) {
     return (
@@ -243,8 +245,59 @@ export function AnimeMascot() {
             </div>
 
             {/* Khung trưng bày nhân vật 3D WebGL & lời thoại */}
-            <div style={{ padding: '20px 20px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
-              {/* Nhân vật Bạch Hồ Ly 3D WebGL (Độ sâu Z-depth, Nghiêng đầu theo chuột, Chớp mắt & Nháy mắt) */}
+            <div style={{ padding: '16px 20px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+              {/* Chuyển đổi chế độ hiển thị 2.5D Linh thần / 3D Thực thể */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  padding: '3px 4px',
+                  borderRadius: 12,
+                  background: 'rgba(0, 0, 0, 0.4)',
+                  border: '1px solid rgba(244, 63, 94, 0.25)',
+                  marginBottom: 12,
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setRenderMode('2.5d')}
+                  style={{
+                    padding: '4px 12px',
+                    borderRadius: 8,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    border: 'none',
+                    background: renderMode === '2.5d' ? 'linear-gradient(135deg, #f43f5e, #be123c)' : 'transparent',
+                    color: renderMode === '2.5d' ? '#fff' : 'rgba(255, 255, 255, 0.6)',
+                    boxShadow: renderMode === '2.5d' ? '0 2px 8px rgba(244, 63, 94, 0.4)' : 'none',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  🔮 Linh Thần (2.5D)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRenderMode('3d')}
+                  style={{
+                    padding: '4px 12px',
+                    borderRadius: 8,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    border: 'none',
+                    background: renderMode === '3d' ? 'linear-gradient(135deg, #2dd4bf, #0f766e)' : 'transparent',
+                    color: renderMode === '3d' ? '#fff' : 'rgba(255, 255, 255, 0.6)',
+                    boxShadow: renderMode === '3d' ? '0 2px 8px rgba(45, 212, 191, 0.4)' : 'none',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  💃 Thực Thể (3D Mesh)
+                </button>
+              </div>
+
+              {/* Nhân vật Bạch Hồ Ly 3D WebGL */}
               <div
                 style={{
                   position: 'relative',
@@ -252,6 +305,7 @@ export function AnimeMascot() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  minHeight: 280,
                 }}
               >
                 {/* Vòng Thần Kính Shinto phát quang mềm mại */}
@@ -261,17 +315,30 @@ export function AnimeMascot() {
                     width: 250,
                     height: 250,
                     borderRadius: '50%',
-                    background: 'radial-gradient(circle, rgba(244, 63, 94, 0.15) 0%, rgba(45, 212, 191, 0.06) 55%, transparent 70%)',
+                    background:
+                      renderMode === '3d'
+                        ? 'radial-gradient(circle, rgba(45, 212, 191, 0.15) 0%, rgba(244, 63, 94, 0.06) 55%, transparent 70%)'
+                        : 'radial-gradient(circle, rgba(244, 63, 94, 0.15) 0%, rgba(45, 212, 191, 0.06) 55%, transparent 70%)',
                     filter: 'blur(16px)',
                     pointerEvents: 'none',
                   }}
                 />
-                <ThreeAnimeCharacter
-                  width={240}
-                  height={280}
-                  interactive={true}
-                  onInteract={interact}
-                />
+
+                {renderMode === '3d' ? (
+                  <ModelAnime3D
+                    width={260}
+                    height={280}
+                    interactive={true}
+                    onInteract={interact}
+                  />
+                ) : (
+                  <ThreeAnimeCharacter
+                    width={240}
+                    height={280}
+                    interactive={true}
+                    onInteract={interact}
+                  />
+                )}
               </div>
 
               {/* Bong bóng thoại sang trọng */}
