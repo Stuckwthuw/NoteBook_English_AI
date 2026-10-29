@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { useMascot } from '@/context/MascotContext';
 import { Sparkles, MessageCircle, X, Heart, Volume2, Shield } from 'lucide-react';
+import { LiveAnimeCharacter } from './LiveAnimeCharacter';
+import { triggerSakuraShower } from '@/lib/confetti';
 
 export function AnimeMascot() {
   const { emotion, message, isMascotVisible, interact, toggleVisibility } = useMascot();
@@ -94,8 +96,12 @@ export function AnimeMascot() {
         {/* Nút bấm hình Bùa Hộ Mệnh Omamori Nhật Bản */}
         <button
           onClick={() => {
-            setIsOpen(!isOpen);
-            if (!isOpen) interact();
+            const nextOpen = !isOpen;
+            setIsOpen(nextOpen);
+            if (nextOpen) {
+              triggerSakuraShower();
+              interact();
+            }
           }}
           className="anime-breathe"
           style={{
@@ -241,28 +247,15 @@ export function AnimeMascot() {
               <div style={{ position: 'absolute', top: 20, left: 30, width: 8, height: 8, borderRadius: '50%', background: 'var(--fox-spirit)', boxShadow: '0 0 14px var(--fox-spirit)', animation: 'foxSpiritOrb 3s infinite' }} />
               <div style={{ position: 'absolute', top: 60, right: 30, width: 7, height: 7, borderRadius: '50%', background: 'var(--fox-ruby)', boxShadow: '0 0 12px var(--fox-ruby)', animation: 'foxSpiritOrb 2.6s infinite 1s' }} />
 
-              {/* Nhân vật Bạch Hồ Ly lớn sắc nét */}
-              <div
-                className={getAnimationClass()}
-                onClick={interact}
-                style={{
-                  position: 'relative',
-                  width: 200,
-                  height: 240,
-                  cursor: 'pointer',
-                  filter: `drop-shadow(0 12px 28px ${getAuraColor()})`,
-                  transition: 'all 0.3s ease',
-                  marginBottom: 16,
-                }}
-                title="Bấm vào Hồ Ly để đổi câu thoại"
-              >
-                <Image
-                  src="/anime/mascot-transparent.png"
-                  alt="Bạch Hồ Ly Companion"
-                  fill
-                  sizes="200px"
-                  style={{ objectFit: 'contain', objectPosition: 'bottom center' }}
-                  priority
+              {/* Nhân vật Bạch Hồ Ly Sống Động (Hiệu ứng triệu hồi + Tự động chớp mắt + Nháy mắt khi click) */}
+              <div style={{ marginBottom: 16 }}>
+                <LiveAnimeCharacter
+                  width={210}
+                  height={250}
+                  showAura={true}
+                  interactive={true}
+                  onInteract={interact}
+                  priority={true}
                 />
               </div>
 

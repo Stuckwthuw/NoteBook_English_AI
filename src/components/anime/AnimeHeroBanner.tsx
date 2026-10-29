@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Sparkles, Brain, Search, Flame } from 'lucide-react';
 import { useMascot } from '@/context/MascotContext';
 import { triggerSakuraShower } from '@/lib/confetti';
+import { LiveAnimeCharacter } from './LiveAnimeCharacter';
 
 interface AnimeHeroBannerProps {
   totalWords: number;
@@ -142,52 +143,18 @@ export function AnimeHeroBanner({ totalWords, masteredWords, needReviewWords }: 
           </div>
         </div>
 
-        {/* Right Column: Nhân vật Bạch Hồ Ly trong Khung Thần Kính tròn mờ ảo */}
-        <div
-          onClick={() => {
-            triggerSakuraShower();
-            interact();
-          }}
-          className="anime-breathe"
-          style={{
-            position: 'relative',
-            width: 105,
-            height: 120,
-            cursor: 'pointer',
-            flexShrink: 0,
-            filter: 'drop-shadow(0 8px 20px rgba(244, 63, 94, 0.4))',
-            transition: 'transform 0.2s',
-          }}
-          title="Nhấn để trò chuyện cùng Bạch Hồ Ly & Kích hoạt mưa Sakura 🌸"
-        >
-          {/* Vòng hào quang Thần Kính xoay chậm */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: -6,
-              borderRadius: '50%',
-              border: '1.5px dashed rgba(244, 63, 94, 0.5)',
-              animation: 'spin 24s linear infinite',
-              pointerEvents: 'none',
+        {/* Right Column: Nhân vật Bạch Hồ Ly Sống Động (Tự chớp mắt & Tương tác) */}
+        <div style={{ flexShrink: 0 }}>
+          <LiveAnimeCharacter
+            width={110}
+            height={125}
+            showAura={true}
+            interactive={true}
+            onInteract={() => {
+              triggerSakuraShower();
+              interact();
             }}
-          />
-          {/* Vòng hào quang phụ màu ngọc bích */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: -2,
-              borderRadius: '50%',
-              border: '1px solid rgba(45, 212, 191, 0.35)',
-              pointerEvents: 'none',
-            }}
-          />
-          <Image
-            src="/anime/mascot-transparent.png"
-            alt="Bạch Hồ Ly"
-            fill
-            sizes="105px"
-            style={{ objectFit: 'contain', objectPosition: 'bottom center' }}
-            priority
+            priority={true}
           />
         </div>
       </div>
