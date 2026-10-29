@@ -80,19 +80,24 @@ Cho phép người dùng tra nhanh từ bất kỳ website nào khi đang đọc
 
 ---
 
-## 4. Luồng 4: Ôn tập ngắt quãng thông minh (Spaced Repetition Review)
+## 4. Luồng 4: Ôn tập ngắt quãng thông minh & Trợ lý Chấm điểm AI (Spaced Repetition & AI Assessment)
 
-Dựa trên nguyên lý đường cong lãng quên (Ebbinghaus Forgetting Curve) và hệ thống Leitner:
+Dựa trên nguyên lý đường cong lãng quên (Ebbinghaus Forgetting Curve) kết hợp hệ thống Leitner và trợ lý thực hành 4 trong 1:
 
 1. **Thuật toán phân loại:**
    - Hệ thống quét toàn bộ từ trong `IndexedDB`.
    - Các từ chưa thuộc (`isMastered === false`) hoặc có khoảng cách từ lần ôn tập trước (`lastReviewedAt`) vượt quá chu kỳ sẽ được đưa vào hàng đợi ôn tập hôm nay.
-2. **Trải nghiệm Flashcard:**
-   - **Mặt trước:** Hiển thị Từ tiếng Anh, Phiên âm IPA, Cấp độ CEFR, Câu ví dụ khuyết từ (ẩn từ khóa).
-   - **Lật thẻ:** Hiển thị Nghĩa tiếng Việt, Từ loại, Gia đình từ, Từ đồng nghĩa/trái nghĩa, Lỗi sai phổ biến.
-3. **Phản hồi người học:**
-   - **Chưa nhớ (Again):** Giữ nguyên hoặc giảm cấp độ, đưa lại vào hàng đợi ôn tập sớm.
-   - **Đã nhớ (Good / Mastered):** Tăng `reviewCount`, cập nhật `lastReviewedAt = Date.now()`, nếu ôn đủ số lần sẽ đánh dấu `isMastered = true`.
+
+2. **4 Chế độ thực hành đa giác quan (Interactive Practice Modes):**
+   - **🃏 Chế độ Lật thẻ (Classic Flashcard):** Mặt trước hiển thị từ, IPA, cấp độ CEFR, nút nghe âm thanh; Mặt sau hiển thị nghĩa tiếng Việt, Collocations, ví dụ theo ngữ cảnh và lỗi thường gặp.
+   - **🎙️ Chế độ Luyện phát âm (Pronunciation & Speech AI):** Sử dụng Web Speech API lắng nghe giọng đọc trực tiếp từ micro; Trợ lý so khớp ngữ âm (Levenshtein + phonetic analysis) $\rightarrow$ Chấm điểm 0-100%, hiển thị chuỗi nghe được, nhận xét ngữ điệu và hướng dẫn theo phiên âm IPA.
+   - **✍️ Chế độ Đặt câu (Sentence Making Practice):** Người học tự sáng tác câu tiếng Anh chứa từ vựng $\rightarrow$ Trợ lý AI (Gemini 3.x Flash hoặc Smart Local Heuristics) chấm điểm câu, kiểm tra ngữ pháp/thì/giới từ, đánh giá độ tự nhiên của ngữ cảnh và gợi ý câu bản xứ kèm nút nghe đọc mẫu.
+   - **💡 Chế độ Nhớ nghĩa (Meaning Recall Quiz):** Người học tự gõ nghĩa tiếng Việt hoặc định nghĩa tiếng Anh $\rightarrow$ Trợ lý đối chiếu với kho từ vựng và các tầng nghĩa theo domain, chấm điểm độ sát nghĩa.
+
+3. **Trợ lý đồng hành & Ghi nhận tiến trình:**
+   - Khi người học đạt điểm cao ($\ge 80\%$) ở bất kỳ bài tập thực hành nào, Trợ lý AI tự động chúc mừng và kích hoạt gợi ý đánh dấu "Đã thuộc".
+   - Bấm **"Đã thuộc"**: Tăng `reviewCount`, cập nhật `lastReviewedAt = Date.now()` và gán `isMastered = true`.
+   - Bấm **"Cần ôn lại"**: Lưu vào hàng đợi ôn tập sớm cho chu kỳ tiếp theo.
 
 ---
 

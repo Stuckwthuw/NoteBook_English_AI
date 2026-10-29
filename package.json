@@ -1,6 +1,13 @@
 {
   "name": "smart-lexicon-notebook",
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "description": "Smart Linguistic Lexicon Notebook powered by Gemini AI, Web Speech Recognition and Browser Extension",
+  "author": "Lê Văn Hoàng Hiếu <hoanghieu20061109@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Stuckwthuw/NoteBook_English_AI.git"
+  },
   "private": true,
   "scripts": {
     "dev": "next dev",

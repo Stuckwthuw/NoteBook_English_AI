@@ -144,3 +144,47 @@ export interface VocabStats {
   byCEFR: Record<string, number>;
   byPOS: Record<string, number>;
 }
+
+// ============================================
+// Review & Practice Evaluation Types
+// ============================================
+
+export type PracticeMode = 'flashcard' | 'pronounce' | 'sentence' | 'meaning';
+
+export interface PronunciationResult {
+  score: number; // 0 - 100
+  spokenText: string;
+  expectedText: string;
+  verdict: 'perfect' | 'good' | 'fair' | 'poor';
+  feedback: string;
+  tip?: string;
+}
+
+export interface SentenceEvaluationResult {
+  score: number; // 0 - 100
+  isGrammaticallyCorrect: boolean;
+  wordUsageScore: number; // 0 - 100
+  feedback: string;
+  betterSentence?: string;
+  translation?: string;
+  highlightedGrammarTips?: string[];
+}
+
+export interface MeaningEvaluationResult {
+  score: number; // 0 - 100
+  isCorrect: boolean;
+  userMeaning: string;
+  officialMeaning: string;
+  feedback: string;
+  additionalNuances?: string[];
+}
+
+export interface SessionPracticeStats {
+  reviewedCount: number;
+  masteredCount: number;
+  pronounceAttempts: number;
+  sentencesWritten: number;
+  meaningsChecked: number;
+  avgScore: number;
+}
+

@@ -22,9 +22,13 @@
 
 # misc
 .DS_Store
+Thumbs.db
 *.pem
+*.key
+*.cert
+*.crt
 
-# debug
+# debug & logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -32,12 +36,29 @@ yarn-error.log*
 *.log
 *.exe
 
-# env files (can opt-in for committing if needed)
+# env files (Bảo mật: Không commit biến môi trường chứa API Key/Secret)
 .env*
+!.env.example
 
-# vercel
+# vercel & turbopack
 .vercel
+.turbo
+
+# IDE & Editor settings
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# User Data & Backups (Bảo mật dữ liệu từ vựng cá nhân của người học)
+lexicon-backup-*.json
+*.backup.json
+*.export.json
+*.userdata.json

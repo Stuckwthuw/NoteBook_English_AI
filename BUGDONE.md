@@ -101,3 +101,19 @@ Tài liệu này ghi lại chi tiết thời gian, cách thức sửa chữa và
      Khi gặp lỗi `503` hoặc `high demand`, hệ thống không ném lỗi ngay mà tự động tạm dừng 1 giây và thử lại lần thứ 2 hoặc chuyển mượt sang model Flash khác.
   4. **Bản dịch thông báo lỗi tiếng Việt thân thiện:**
      Nếu toàn bộ cụm máy chủ Google bị nghẽn, báo rõ ràng: *"Máy chủ Google Gemini đang tạm thời quá tải (503 High demand). Bạn hãy bấm 'Phân tích AI' lại sau vài giây nhé!"*.
+
+---
+
+## 6. Nâng cấp: Hệ thống Trợ lý Ôn tập Đa giác quan & Chấm điểm AI
+- **Thời gian xử lý:** 2026-10-29 (UTC+7)
+- **Files tạo mới & can thiệp:**
+  - `src/hooks/useSpeechRecognition.ts`: Hook nhận diện giọng nói Web Speech API an toàn SSR.
+  - `src/lib/ai/evaluator.ts`: Bộ trợ lý chấm điểm phát âm (so khớp ngữ âm Levenshtein), chấm điểm đặt câu (kiểm tra ngữ pháp/ngữ cảnh) và kiểm tra nhớ nghĩa.
+  - `src/components/review/PronunciationPractice.tsx`: Giao diện luyện nói với micro và bảng điểm phát âm.
+  - `src/components/review/SentencePractice.tsx`: Giao diện đặt câu với gợi ý collocations và trợ lý AI sửa lỗi.
+  - `src/components/review/MeaningPractice.tsx`: Giao diện kiểm tra trí nhớ nghĩa tiếng Anh / tiếng Việt.
+  - `src/app/review/page.tsx`: Tích hợp 4 tab chế độ thực hành (Lật thẻ, Phát âm, Đặt câu, Nhớ nghĩa) và trợ lý khích lệ tiến trình.
+- **Bài học kỹ thuật tuân thủ:**
+  1. **An toàn SSR cho Web Speech API:** Kiểm tra `typeof window !== 'undefined'` và `window.SpeechRecognition || window.webkitSpeechRecognition`, kèm giao diện thông báo nếu trình duyệt không hỗ trợ microphone.
+  2. **Tuân thủ triệt để BUG-004:** Cài đặt người dùng (`accentPreference`, `geminiApiKey`) chỉ được tải trong `useEffect` với cờ `mounted = true` để chống lỗi Hydration Mismatch.
+  3. **Tuân thủ triệt để BUG-005:** Gọi model thế hệ mới `gemini-3.8-flash` cho trợ lý chấm câu, đồng thời luôn có bộ chấm điểm cục bộ (Offline / Rule-based Heuristic) làm fallback để người dùng không có API Key vẫn được chấm điểm tức thì.

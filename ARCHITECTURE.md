@@ -43,14 +43,21 @@ NoteBook_English_AI/
 │   ├── components/
 │   │   ├── ai/                  # Giao diện AI (AILookupPanel, PasteResultModal)
 │   │   ├── layout/              # Header, Navbar thanh điều hướng
+│   │   ├── review/              # Giao diện ôn tập tương tác (Phát âm, Đặt câu, Nhớ nghĩa)
+│   │   │   ├── MeaningPractice.tsx       # Chế độ kiểm tra nhớ nghĩa & trợ lý đối chiếu
+│   │   │   ├── PronunciationPractice.tsx # Chế độ luyện nói & trợ lý chấm điểm giọng nói
+│   │   │   └── SentencePractice.tsx      # Chế độ đặt câu & trợ lý AI chấm ngữ pháp
 │   │   ├── ui/                  # Toast notification, Badges, Modals
 │   │   └── vocabulary/          # WordCard, WordFamilyList, ContextsList
 │   ├── hooks/                   # Custom React Hooks
 │   │   ├── useAI.ts             # Hook điều phối phân tích AI và modal dán kết quả
+│   │   ├── usePronunciation.ts  # Hook phát âm mẫu (Text-to-Speech Web API)
+│   │   ├── useSpeechRecognition.ts # Hook nhận diện giọng nói (Speech-to-Text Web API)
 │   │   ├── useTheme.ts          # Hook quản lý theme dark/light
 │   │   └── useVocabulary.ts     # Hook CRUD từ vựng và đồng bộ IndexedDB
 │   └── lib/
 │       ├── ai/                  # AI Engine Modules
+│       │   ├── evaluator.ts     # Trợ lý AI chấm điểm giọng nói, câu đặt và trí nhớ nghĩa
 │       │   ├── gemini.ts        # Gọi Google Gemini API với auto-discovery & retry
 │       │   ├── parser.ts        # Trích xuất linh hoạt từ JSON hoặc văn bản chat
 │       │   ├── prompt-builder.ts# Tạo câu lệnh chuẩn ngôn ngữ học (CEFR, Family, POS)

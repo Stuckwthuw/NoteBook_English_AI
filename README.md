@@ -1,6 +1,6 @@
 # 📚 Smart Linguistic Lexicon Notebook (AI-Powered)
 
-Sổ tay từ vựng tiếng Anh thông minh ứng dụng AI (Google Gemini, ChatGPT, Claude) kết hợp tiện ích mở rộng trình duyệt (Brave / Chrome Extension) giúp bôi đen và tra cứu từ vựng tức thì khi đọc báo, xem tài liệu.
+Sổ tay từ vựng tiếng Anh thông minh ứng dụng AI (Google Gemini, ChatGPT, Claude) kết hợp tiện ích mở rộng trình duyệt (Brave / Chrome Extension) giúp bôi đen và tra cứu từ vựng tức thì khi đọc báo, xem tài liệu, kèm **Trợ lý AI chấm điểm giọng nói, câu văn và kiến thức ôn tập đa giác quan**.
 
 ---
 
@@ -11,9 +11,30 @@ Sổ tay từ vựng tiếng Anh thông minh ứng dụng AI (Google Gemini, Cha
 - 🔄 **Linh hoạt 2 chế độ AI**:
   - **Chế độ API 1-Click (Khuyên dùng)**: Kết nối trực tiếp Google Gemini API (dòng Gemini 3.x Flash siêu tốc, miễn phí 1500 req/ngày).
   - **Chế độ Web Chat Miễn phí**: Tự động sinh câu lệnh chuẩn ngôn ngữ học, tự copy vào Clipboard để bạn dán sang ChatGPT, Claude, Gemini mà không cần API Key.
-- 🧠 **Ôn tập thông minh (Spaced Repetition - SRS)**: Thuật toán lặp lại ngắt quãng giúp tối ưu hóa khả năng ghi nhớ dài hạn qua hệ thống Flashcard.
-- 🔊 **Phát âm chuẩn IPA**: Hỗ trợ Text-to-Speech phát âm giọng Anh - Anh (UK) và Anh - Mỹ (US).
-- 💾 **Lưu trữ Offline an toàn**: Dữ liệu lưu vĩnh viễn trên trình duyệt bằng **IndexedDB**, có tính năng Xuất/Nhập file JSON để sao lưu hoặc chia sẻ cho bạn bè.
+- 🎯 **Trợ lý Ôn tập Đa giác quan 4 trong 1 (Smart Review Hub)**:
+  - 🃏 **Lật thẻ Flashcard (SRS)**: Ôn tập ngắt quãng dựa trên đường cong lãng quên Ebbinghaus & Leitner.
+  - 🎙️ **Luyện phát âm & Chấm điểm giọng nói**: Thu âm qua Micro (Web Speech API), so khớp ngữ âm Levenshtein, chấm điểm 0 - 100%, chỉ ra âm lệch và hướng dẫn phát âm chuẩn theo IPA.
+  - ✍️ **Đặt câu & Trợ lý sửa lỗi ngữ pháp**: Tự viết câu chứa từ vựng, Trợ lý AI chấm điểm ngữ pháp, thì, độ tự nhiên, gợi ý câu viết bản xứ kèm phát âm mẫu.
+  - 💡 **Kiểm tra trí nhớ nghĩa**: Tự gõ nghĩa tiếng Việt hoặc tiếng Anh, hệ thống đối chiếu và chấm điểm độ hiểu từ.
+- 🔊 **Phát âm chuẩn IPA**: Hỗ trợ Text-to-Speech phát âm chuẩn giọng Anh - Anh (UK) và Anh - Mỹ (US).
+- 💾 **Lưu trữ Offline an toàn**: Dữ liệu lưu vĩnh viễn trên trình duyệt bằng **IndexedDB**, có tính năng Xuất/Nhập file JSON để sao lưu hoặc chuyển đổi thiết bị.
+
+---
+
+## 🔒 Chính Sách Bảo Mật & Phân Định Công Khai (Security & Privacy)
+
+Dự án tuân thủ nghiêm ngặt nguyên tắc **Local-First & Privacy-By-Design**:
+
+### 1. Dữ liệu được CÔNG KHAI (Public Repository)
+- Toàn bộ mã nguồn Next.js (App Router), components, hooks và các thuật toán phân tích ngôn ngữ học.
+- Tiện ích mở rộng Chrome/Brave Extension (Manifest V3).
+- Tài liệu kiến trúc hệ thống ([`ARCHITECTURE.md`](ARCHITECTURE.md)), quy trình hoạt động ([`WORKFLOW.md`](WORKFLOW.md)), nhật ký sửa lỗi ([`BUGDONE.md`](BUGDONE.md)).
+
+### 2. Dữ liệu BẢO MẬT & THUỘC QUYỀN SỞ HỮU CÁ NHÂN (Private & Protected)
+- 🔑 **API Keys**: Các khóa API (Gemini, OpenAI, Claude) được lưu trữ hoàn toàn tại `localStorage` trên trình duyệt cá nhân của người dùng. **Tuyệt đối không gửi về bất kỳ máy chủ bên thứ ba nào** và được loại trừ hoàn toàn khỏi mã nguồn Git (`.gitignore`).
+- 📓 **Dữ liệu Sổ tay Từ vựng**: Lưu 100% trên `IndexedDB` nội bộ máy tính của bạn, hoạt động hoàn hảo khi không có internet.
+- 🎙️ **Giọng nói & Âm thanh**: Quá trình thu âm phát âm được xử lý trực tiếp trên trình duyệt thông qua Web Speech API tiêu chuẩn, không lưu tệp âm thanh ra ngoài.
+- 📦 **Tệp sao lưu cá nhân**: Các tệp xuất `lexicon-backup-*.json` được cấu hình tự động bỏ qua trong `.gitignore` để đảm bảo sự riêng tư cho kho từ vựng của bạn.
 
 ---
 
@@ -21,7 +42,11 @@ Sổ tay từ vựng tiếng Anh thông minh ứng dụng AI (Google Gemini, Cha
 
 ### Bước 1: Chuẩn bị môi trường (Nếu máy chưa có)
 - Tải và cài đặt **Node.js (Bản LTS khuyên dùng: v20 hoặc v22)** tại: [https://nodejs.org](https://nodejs.org/) (chỉ cần Next $\rightarrow$ Next $\rightarrow$ Install).
-- Tải mã nguồn dự án về máy tính (bằng `git clone` hoặc bấm **Code $\rightarrow$ Download ZIP** trên GitHub rồi giải nén).
+- Tải mã nguồn dự án về máy tính:
+  ```bash
+  git clone https://github.com/Stuckwthuw/NoteBook_English_AI.git
+  cd NoteBook_English_AI
+  ```
 
 ---
 
@@ -102,23 +127,27 @@ NoteBook_English_AI/
 │   └── setup-windows-startup.bat# Ghim tự khởi động cùng máy tính Windows
 ├── src/
 │   ├── app/                     # Next.js App Router (Dashboard, Vocabulary, Lookup, Review, Settings)
-│   ├── components/              # UI components (WordCard, AILookupPanel, Header, Toast...)
-│   ├── hooks/                   # Custom React hooks (useVocabulary, useAI, useTheme...)
-│   └── lib/                     # IndexedDB storage, AI Prompt builder, Gemini API router & parsers
+│   ├── components/
+│   │   ├── ai/                  # AILookupPanel, PasteResultModal
+│   │   ├── layout/              # Header, Navbar
+│   │   ├── review/              # PronunciationPractice, SentencePractice, MeaningPractice
+│   │   ├── ui/                  # Toast, CEFRBadges, Modals
+│   │   └── vocabulary/          # WordCard, WordFamilyList...
+│   ├── hooks/                   # useVocabulary, useAI, usePronunciation, useSpeechRecognition...
+│   └── lib/                     # IndexedDB storage, AI Evaluator, Gemini API router & parsers
 ├── ARCHITECTURE.md              # Kiến trúc hệ thống và TypeScript schema
 ├── WORKFLOW.md                  # 5 luồng nghiệp vụ & dữ liệu chi tiết
 ├── BUG.md                       # Tổng hợp lỗi từng gặp
 ├── BUGDONE.md                   # Nhật ký sửa lỗi chi tiết
+├── LICENSE                      # Giấy phép bản quyền MIT License
 └── README.md                    # Hướng dẫn cài đặt & sử dụng này
 ```
 
 ---
 
-## 📖 Tài liệu kỹ thuật chuyên sâu
+## 📜 Bản Quyền & Sở Hữu Trí Tuệ (Author & License)
 
-Dành cho nhà phát triển và trợ lý AI (AI Coding Assistants):
-
-- 🏛️ **[ARCHITECTURE.md](ARCHITECTURE.md)**: Kiến trúc phần mềm, cấu trúc thư mục, Tech Stack & Lược đồ dữ liệu TypeScript.
-- 🔄 **[WORKFLOW.md](WORKFLOW.md)**: 5 Luồng nghiệp vụ từ tra từ, phân tích AI, tiện ích Extension đến chu kỳ ôn tập ngắt quãng (SRS).
-- 📋 **[BUG.md](BUG.md)**: Tổng hợp các lỗi đã phát sinh từ lúc khởi tạo dự án đến nay.
-- 🛠️ **[BUGDONE.md](BUGDONE.md)**: Nhật ký giải quyết lỗi chi tiết (nguyên nhân, cách sửa chuẩn & bài học kinh nghiệm).
+- **Tác giả & Người phát triển chính:** **Lê Văn Hoàng Hiếu** ([Stuckwthuw](https://github.com/Stuckwthuw))
+- **Email liên hệ:** `hoanghieu20061109@gmail.com`
+- **GitHub Repository:** [https://github.com/Stuckwthuw/NoteBook_English_AI](https://github.com/Stuckwthuw/NoteBook_English_AI)
+- **Giấy phép phần mềm:** Dự án được phát hành theo giấy phép mã nguồn mở **[MIT License](LICENSE)**. Toàn quyền tác giả thuộc về Lê Văn Hoàng Hiếu (Copyright © 2026).
