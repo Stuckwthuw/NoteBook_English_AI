@@ -26,10 +26,12 @@ import { MeaningPractice } from '@/components/review/MeaningPractice';
 import { getSettings } from '@/lib/storage';
 import type { PracticeMode, AppSettings } from '@/lib/types';
 import { DEFAULT_SETTINGS } from '@/lib/types';
+import { useMascot } from '@/context/MascotContext';
 
 export default function ReviewPage() {
   const { words, markReviewed, loading } = useVocabulary();
   const { speak, speaking } = usePronunciation();
+  const { triggerEmotion } = useMascot();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -77,6 +79,7 @@ export default function ReviewPage() {
 
   const handleMastered = async () => {
     if (currentWord) {
+      triggerEmotion('celebrate', `🎉 Tuyệt vời! Bạn đã thuộc từ "${currentWord.word}" rồi! Tiếp tục phát huy nhé! 🏆🏮`, 5500);
       await markReviewed(currentWord.id, true);
       goNext();
     }
@@ -84,12 +87,14 @@ export default function ReviewPage() {
 
   const handleNeedReview = async () => {
     if (currentWord) {
+      triggerEmotion('encourage', `Đừng lo nhé, từ "${currentWord.word}" này chúng ta sẽ ôn lại ở lượt tiếp theo! Cố lên nào! 🌸📜`, 4500);
       await markReviewed(currentWord.id, false);
       goNext();
     }
   };
 
   const handlePracticeSuccess = () => {
+    triggerEmotion('happy', `✨ Xuất sắc! Bạn vừa hoàn thành bài tập cho từ "${currentWord?.word}" rất chuẩn! 🦊💖`, 5000);
     setAssistantPraise(
       `🎉 Xuất sắc! Bạn đã thực hành rất tốt từ "${currentWord?.word}". Hãy đánh dấu "Đã thuộc" để ghi nhận nhé!`
     );

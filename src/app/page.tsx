@@ -15,6 +15,7 @@ import { Header } from '@/components/layout/Header';
 import { useVocabulary } from '@/hooks/useVocabulary';
 import { CEFRBadge } from '@/components/vocabulary/CEFRBadge';
 import { WordCard } from '@/components/vocabulary/WordCard';
+import { AnimeHeroBanner } from '@/components/anime/AnimeHeroBanner';
 
 export default function DashboardPage() {
   const { words, stats, loading, toggleMastered, removeWord, updateWord } = useVocabulary();
@@ -24,6 +25,13 @@ export default function DashboardPage() {
   return (
     <div>
       <Header title="Tổng quan" subtitle="Chào mừng bạn quay lại! Hôm nay bạn muốn học từ gì?" />
+
+      {/* Anime Fox Girl Hero Banner */}
+      <AnimeHeroBanner
+        totalWords={stats.total}
+        masteredWords={stats.mastered}
+        needReviewWords={stats.needReview}
+      />
 
       {/* Quick Actions */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>

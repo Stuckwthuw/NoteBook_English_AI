@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -68,10 +69,53 @@ export function Sidebar() {
           })}
         </nav>
 
-        <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border-color)', fontSize: 11, color: 'var(--muted)' }}>
+        {/* Mini Mascot Companion Widget */}
+        <div
+          style={{
+            margin: '12px 12px 16px',
+            padding: '12px 14px',
+            borderRadius: 16,
+            background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.08) 0%, rgba(45, 212, 191, 0.05) 100%)',
+            border: '1px solid rgba(244, 63, 94, 0.2)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            boxShadow: '0 4px 14px rgba(244, 63, 94, 0.06)',
+          }}
+        >
+          <div
+            className="anime-breathe"
+            style={{
+              position: 'relative',
+              width: 38,
+              height: 44,
+              flexShrink: 0,
+              filter: 'drop-shadow(0 4px 8px rgba(244, 63, 94, 0.35))',
+            }}
+          >
+            <Image
+              src="/anime/mascot-transparent.png"
+              alt="Bạch Hồ Ly Mini"
+              fill
+              sizes="38px"
+              style={{ objectFit: 'contain', objectPosition: 'bottom center' }}
+            />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--fg)', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span>Bạch Hồ Ly</span>
+              <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 8, background: 'var(--fox-ruby)', color: 'white' }}>Online</span>
+            </div>
+            <div style={{ fontSize: 10, color: 'var(--muted-fg)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              Trợ lý học từ vựng 🌸
+            </div>
+          </div>
+        </div>
+
+        <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border-color)', fontSize: 11, color: 'var(--muted)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span>🎓</span>
-            <span>Smart Lexicon v1.0</span>
+            <span>Smart Lexicon Anime v2.0</span>
           </div>
         </div>
       </aside>

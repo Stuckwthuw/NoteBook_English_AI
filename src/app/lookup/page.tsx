@@ -9,6 +9,7 @@ import { useVocabulary } from '@/hooks/useVocabulary';
 import { useToast } from '@/components/ui/Toast';
 import type { WordData, VocabularyEntry } from '@/lib/types';
 import { Save, Plus } from 'lucide-react';
+import { useMascot } from '@/context/MascotContext';
 
 function LookupContent() {
   const searchParams = useSearchParams();
@@ -18,10 +19,12 @@ function LookupContent() {
   const [saved, setSaved] = useState(false);
   const { addWord } = useVocabulary();
   const { toast } = useToast();
+  const { triggerEmotion } = useMascot();
 
   const handleResult = (data: WordData) => {
     setLastResult(data);
     setSaved(false);
+    triggerEmotion('thinking', `Hồ ly đã phân tích xong từ "${data.word}"! Hãy xem kỹ phiên âm và các ngữ cảnh nhé! 📜✨`, 5000);
   };
 
   const handleSave = async () => {
@@ -30,6 +33,7 @@ function LookupContent() {
       await addWord(lastResult);
       setSaved(true);
       toast(`"${lastResult.word}" đã lưu vào sổ tay!`, 'success');
+      triggerEmotion('happy', `Tuyệt vời! Đã thêm "${lastResult.word}" vào sổ tay từ vựng! Nhớ ôn tập thường xuyên cùng thiếp nha! 🌸💖`, 5500);
     } catch {
       toast('Lỗi khi lưu từ.', 'error');
     }

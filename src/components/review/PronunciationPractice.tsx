@@ -6,6 +6,7 @@ import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { usePronunciation } from '@/hooks/usePronunciation';
 import { evaluatePronunciation } from '@/lib/ai/evaluator';
 import type { WordData, PronunciationResult } from '@/lib/types';
+import { useMascot } from '@/context/MascotContext';
 
 interface PronunciationPracticeProps {
   word: WordData;
@@ -21,6 +22,7 @@ export function PronunciationPractice({
   const { isListening, transcript, error, isSupported, startListening, stopListening, resetTranscript } =
     useSpeechRecognition();
   const { speak, speaking } = usePronunciation();
+  const { triggerEmotion } = useMascot();
 
   const [evalResult, setEvalResult] = useState<PronunciationResult | null>(null);
 
@@ -29,11 +31,16 @@ export function PronunciationPractice({
     if (!isListening && transcript) {
       const result = evaluatePronunciation(transcript, word.word, word.ipa);
       setEvalResult(result);
-      if (result.score >= 85 && onSuccess) {
-        onSuccess();
+      if (result.score >= 85) {
+        triggerEmotion('celebrate', `🎉 Xuất sắc! Bạn phát âm từ "${word.word}" chuẩn xác ${result.score}% luôn nè!`, 5000);
+        if (onSuccess) onSuccess();
+      } else if (result.score < 60) {
+        triggerEmotion('encourage', `Đừng lo nhé! Bấm nghe lại phát âm mẫu rồi thử lại cùng thiếp nha! 🌸`, 4500);
+      } else {
+        triggerEmotion('happy', `Khá tốt rồi đó (${result.score}%)! Chú ý thêm một chút về trọng âm nha! ✨`, 4500);
       }
     }
-  }, [isListening, transcript, word.word, word.ipa, onSuccess]);
+  }, [isListening, transcript, word.word, word.ipa, onSuccess, triggerEmotion]);
 
   // Reset khi đổi từ
   useEffect(() => {
@@ -47,6 +54,7 @@ export function PronunciationPractice({
     } else {
       setEvalResult(null);
       resetTranscript();
+      triggerEmotion('thinking', 'Thiếp đang lắng nghe bạn đọc... Hãy phát âm thật tự tin nha! 🎙️🦊', 5000);
       const lang = accentPreference === 'UK' ? 'en-GB' : 'en-US';
       startListening(lang);
     }

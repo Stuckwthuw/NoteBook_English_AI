@@ -56,6 +56,12 @@
   --sidebar-bg: #ffffff;
   --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
   --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.04);
+  /* Anime Fox Theme Tokens */
+  --fox-crimson: #e11d48;
+  --fox-ruby: #f43f5e;
+  --fox-gold: #f59e0b;
+  --fox-spirit: #0d9488;
+  --fox-aura: rgba(244, 63, 94, 0.15);
 }
 
 /* ============================================ */
@@ -86,6 +92,12 @@
   --sidebar-bg: #111927;
   --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.15);
   --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.3), 0 4px 10px rgba(0, 0, 0, 0.2);
+  /* Anime Fox Theme Tokens */
+  --fox-crimson: #f43f5e;
+  --fox-ruby: #fb7185;
+  --fox-gold: #fbbf24;
+  --fox-spirit: #2dd4bf;
+  --fox-aura: rgba(244, 63, 94, 0.3);
 }
 
 /* ============================================ */
@@ -182,6 +194,170 @@ body {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+/* ============================================ */
+/* Anime Fox Girl Animations (Smooth & Fluid)   */
+/* ============================================ */
+
+/* Breathing & Idle Floating */
+@keyframes animeBreathe {
+  0%, 100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.015, 1.02);
+  }
+}
+
+/* Happy / Cheerful Bounce */
+@keyframes animeHappy {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translateY(-14px) rotate(-2deg) scale(1.05);
+  }
+  50% {
+    transform: translateY(-4px) rotate(2deg) scale(1.03);
+  }
+  75% {
+    transform: translateY(-10px) rotate(-1deg) scale(1.04);
+  }
+}
+
+/* Thinking / Concentrating Glow */
+@keyframes animeThinking {
+  0%, 100% {
+    transform: translateY(-3px) scale(1);
+    filter: drop-shadow(0 0 16px rgba(45, 212, 191, 0.45));
+  }
+  50% {
+    transform: translateY(-6px) scale(1.02);
+    filter: drop-shadow(0 0 28px rgba(45, 212, 191, 0.75));
+  }
+}
+
+/* Encouraging / Gentle Nod */
+@keyframes animeEncourage {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  30% {
+    transform: translateY(-4px) rotate(3deg);
+  }
+  60% {
+    transform: translateY(-2px) rotate(-2deg);
+  }
+}
+
+/* Celebrate / Jump & Glow */
+@keyframes animeCelebrate {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 0 20px rgba(244, 63, 94, 0.5));
+  }
+  30% {
+    transform: translateY(-20px) scale(1.08) rotate(-3deg);
+    filter: drop-shadow(0 0 35px rgba(251, 191, 36, 0.8));
+  }
+  60% {
+    transform: translateY(-10px) scale(1.04) rotate(3deg);
+    filter: drop-shadow(0 0 30px rgba(244, 63, 94, 0.8));
+  }
+}
+
+/* Fox Spirit Fire Particles Orbit */
+@keyframes foxSpiritOrb {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.8);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateY(-25px) translateX(12px) scale(1.2);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(-50px) translateX(-8px) scale(0.6);
+    opacity: 0;
+  }
+}
+
+/* Sakura Petal Floating */
+@keyframes sakuraFloat {
+  0% {
+    transform: translateY(-10px) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.9;
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(120px) translateX(45px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Speech Bubble Pop */
+@keyframes bubblePop {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+  70% {
+    transform: scale(1.03) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Heart Float */
+@keyframes heartFloat {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-40px) scale(1.2);
+    opacity: 0;
+  }
+}
+
+.anime-breathe {
+  animation: animeBreathe 3.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+.anime-happy {
+  animation: animeHappy 1.2s ease-in-out infinite;
+  will-change: transform;
+}
+
+.anime-thinking {
+  animation: animeThinking 2.2s ease-in-out infinite;
+  will-change: transform, filter;
+}
+
+.anime-encourage {
+  animation: animeEncourage 2.4s ease-in-out infinite;
+  will-change: transform;
+}
+
+.anime-celebrate {
+  animation: animeCelebrate 1.4s ease-in-out infinite;
+  will-change: transform, filter;
+}
+
+.anime-bubble {
+  animation: bubblePop 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .animate-fade-in { animation: fadeIn 0.4s ease-out; }

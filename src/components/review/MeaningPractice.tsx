@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Check, Sparkles, CheckCircle2, AlertCircle, HelpCircle, RefreshCw } from 'lucide-react';
 import { evaluateMeaning } from '@/lib/ai/evaluator';
 import type { WordData, MeaningEvaluationResult } from '@/lib/types';
+import { useMascot } from '@/context/MascotContext';
 
 interface MeaningPracticeProps {
   word: WordData;
@@ -16,17 +17,22 @@ export function MeaningPractice({ word, apiKey, onSuccess }: MeaningPracticeProp
   const [checking, setChecking] = useState(false);
   const [evalResult, setEvalResult] = useState<MeaningEvaluationResult | null>(null);
   const [showFullAnswer, setShowFullAnswer] = useState(false);
+  const { triggerEmotion } = useMascot();
 
   const handleCheck = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputMeaning.trim() || checking) return;
 
     setChecking(true);
+    triggerEmotion('thinking', `Thiếp đang đối chiếu nghĩa từ "${word.word}" với kho ngữ liệu... 💡`, 4500);
     try {
       const result = await evaluateMeaning(inputMeaning, word, apiKey);
       setEvalResult(result);
-      if (result.score >= 80 && onSuccess) {
-        onSuccess();
+      if (result.score >= 80) {
+        triggerEmotion('celebrate', `Chính xác (${result.score}%)! Trí nhớ của bạn về từ "${word.word}" rất xuất sắc! 🌟🦊`, 5500);
+        if (onSuccess) onSuccess();
+      } else {
+        triggerEmotion('encourage', `Chưa chính xác hoàn toàn. Hãy xem đáp án chuẩn để ghi nhớ sâu hơn nhé! 🌸`, 5000);
       }
     } catch (err) {
       console.error('Lỗi kiểm tra nghĩa:', err);

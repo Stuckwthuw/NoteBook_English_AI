@@ -5,6 +5,7 @@ import { Send, Sparkles, CheckCircle2, AlertCircle, Volume2, Lightbulb, RefreshC
 import { evaluateSentence } from '@/lib/ai/evaluator';
 import { usePronunciation } from '@/hooks/usePronunciation';
 import type { WordData, SentenceEvaluationResult } from '@/lib/types';
+import { useMascot } from '@/context/MascotContext';
 
 interface SentencePracticeProps {
   word: WordData;
@@ -17,17 +18,22 @@ export function SentencePractice({ word, apiKey, onSuccess }: SentencePracticePr
   const [evaluating, setEvaluating] = useState(false);
   const [evalResult, setEvalResult] = useState<SentenceEvaluationResult | null>(null);
   const { speak } = usePronunciation();
+  const { triggerEmotion } = useMascot();
 
   const handleEvaluate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!sentence.trim() || evaluating) return;
 
     setEvaluating(true);
+    triggerEmotion('thinking', `Thiếp đang kiểm tra ngữ pháp và ngữ cảnh câu văn cho từ "${word.word}"... 🔮`, 5000);
     try {
       const result = await evaluateSentence(sentence, word, apiKey);
       setEvalResult(result);
-      if (result.score >= 80 && onSuccess) {
-        onSuccess();
+      if (result.score >= 80) {
+        triggerEmotion('celebrate', `Tuyệt đỉnh (${result.score} điểm)! Câu văn của bạn rất tự nhiên và đúng ngữ cảnh! ✍️🌟`, 5500);
+        if (onSuccess) onSuccess();
+      } else {
+        triggerEmotion('encourage', `Khá ổn (${result.score} điểm)! Xem thêm gợi ý của thiếp để câu hoàn hảo hơn nhé! 🌸`, 5000);
       }
     } catch (err) {
       console.error('Lỗi khi chấm câu:', err);
