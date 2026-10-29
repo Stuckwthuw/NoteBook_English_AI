@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useMascot } from '@/context/MascotContext';
 import { Sparkles, MessageCircle, X, Heart, Volume2, Shield } from 'lucide-react';
 import { LiveAnimeCharacter } from './LiveAnimeCharacter';
+import { ThreeAnimeCharacter } from './ThreeAnimeCharacter';
 import { triggerSakuraShower } from '@/lib/confetti';
 
 export function AnimeMascot() {
@@ -241,21 +242,15 @@ export function AnimeMascot() {
               </button>
             </div>
 
-            {/* Khung trưng bày nhân vật & lời thoại */}
-            <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
-              {/* Đốm lửa ma trắc hồ ly */}
-              <div style={{ position: 'absolute', top: 20, left: 30, width: 8, height: 8, borderRadius: '50%', background: 'var(--fox-spirit)', boxShadow: '0 0 14px var(--fox-spirit)', animation: 'foxSpiritOrb 3s infinite' }} />
-              <div style={{ position: 'absolute', top: 60, right: 30, width: 7, height: 7, borderRadius: '50%', background: 'var(--fox-ruby)', boxShadow: '0 0 12px var(--fox-ruby)', animation: 'foxSpiritOrb 2.6s infinite 1s' }} />
-
-              {/* Nhân vật Bạch Hồ Ly Sống Động (Hiệu ứng triệu hồi + Tự động chớp mắt + Nháy mắt khi click) */}
-              <div style={{ marginBottom: 16 }}>
-                <LiveAnimeCharacter
-                  width={210}
-                  height={250}
-                  showAura={true}
+            {/* Khung trưng bày nhân vật 3D WebGL & lời thoại */}
+            <div style={{ padding: '20px 20px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+              {/* Nhân vật Bạch Hồ Ly 3D WebGL (Độ sâu Z-depth, Nghiêng đầu theo chuột, Chớp mắt & Nháy mắt) */}
+              <div style={{ marginBottom: 14 }}>
+                <ThreeAnimeCharacter
+                  width={240}
+                  height={280}
                   interactive={true}
                   onInteract={interact}
-                  priority={true}
                 />
               </div>
 

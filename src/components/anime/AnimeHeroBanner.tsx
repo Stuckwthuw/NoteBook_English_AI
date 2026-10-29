@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Sparkles, Brain, Search, Flame } from 'lucide-react';
 import { useMascot } from '@/context/MascotContext';
 import { triggerSakuraShower } from '@/lib/confetti';
-import { LiveAnimeCharacter } from './LiveAnimeCharacter';
+import { ThreeAnimeCharacter } from './ThreeAnimeCharacter';
 
 interface AnimeHeroBannerProps {
   totalWords: number;
@@ -143,18 +143,16 @@ export function AnimeHeroBanner({ totalWords, masteredWords, needReviewWords }: 
           </div>
         </div>
 
-        {/* Right Column: Nhân vật Bạch Hồ Ly Sống Động (Tự chớp mắt & Tương tác) */}
+        {/* Right Column: Nhân vật Bạch Hồ Ly 3D WebGL (Độ sâu Z-depth & Nghiêng đầu 3D theo chuột) */}
         <div style={{ flexShrink: 0 }}>
-          <LiveAnimeCharacter
-            width={110}
-            height={125}
-            showAura={true}
+          <ThreeAnimeCharacter
+            width={115}
+            height={130}
             interactive={true}
             onInteract={() => {
               triggerSakuraShower();
               interact();
             }}
-            priority={true}
           />
         </div>
       </div>
