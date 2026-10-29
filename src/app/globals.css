@@ -632,7 +632,7 @@ body {
 
   .main-content {
     margin-left: 0 !important;
-    padding-bottom: 80px !important;
+    padding: 0 16px 90px !important;
   }
 
   .mobile-nav {
@@ -641,12 +641,20 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    background: var(--surface);
-    border-top: 1px solid var(--border-color);
-    padding: 8px 0;
-    z-index: 40;
+    background: rgba(17, 24, 39, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(244, 63, 94, 0.25);
+    padding: 8px 12px 12px;
+    z-index: 100 !important; /* Luôn nổi trên cùng, không bị che khuất */
     justify-content: space-around;
     align-items: center;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Ẩn mascot lớn đè lên thanh điều hướng trên mobile */
+  .anime-mascot-desktop-dock {
+    display: none !important;
   }
 
   .mobile-nav-item {

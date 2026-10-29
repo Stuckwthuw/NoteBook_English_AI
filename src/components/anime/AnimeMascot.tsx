@@ -3,12 +3,11 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useMascot } from '@/context/MascotContext';
-import { Sparkles, MessageCircle, Minimize2, Maximize2, EyeOff, Heart } from 'lucide-react';
+import { Sparkles, MessageCircle, X, Heart, Volume2, Shield } from 'lucide-react';
 
 export function AnimeMascot() {
-  const { emotion, message, isMascotVisible, isMinimized, interact, toggleVisibility, toggleMinimize } =
-    useMascot();
-  const [showBubble, setShowBubble] = useState(true);
+  const { emotion, message, isMascotVisible, interact, toggleVisibility } = useMascot();
+  const [isOpen, setIsOpen] = useState(false);
 
   if (!isMascotVisible) {
     return (
@@ -16,88 +15,26 @@ export function AnimeMascot() {
         onClick={toggleVisibility}
         style={{
           position: 'fixed',
-          bottom: 24,
-          right: 24,
-          zIndex: 999,
-          padding: '8px 14px',
-          borderRadius: 20,
-          background: 'var(--surface)',
+          top: 14,
+          right: 70,
+          zIndex: 45,
+          padding: '4px 10px',
+          borderRadius: 16,
+          background: 'rgba(26, 35, 50, 0.9)',
           border: '1px solid var(--fox-ruby)',
           color: 'var(--fox-ruby)',
-          boxShadow: '0 4px 20px rgba(244, 63, 94, 0.25)',
+          fontSize: 11,
+          fontWeight: 700,
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
-          gap: 6,
-          fontSize: 12,
-          fontWeight: 600,
+          gap: 4,
+          backdropFilter: 'blur(8px)',
         }}
-        title="Hiện Trợ lý Hồ Ly"
+        title="Mở Bùa Hộ Mệnh Hồ Ly"
       >
-        <span>🦊</span> Hiện Trợ lý
+        <span>🏮</span> Trợ lý
       </button>
-    );
-  }
-
-  // Chế độ thu nhỏ (Mini badge)
-  if (isMinimized) {
-    return (
-      <div
-        style={{
-          position: 'fixed',
-          bottom: 24,
-          right: 24,
-          zIndex: 999,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-        }}
-      >
-        <button
-          onClick={interact}
-          className="anime-breathe"
-          style={{
-            width: 54,
-            height: 54,
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(13, 148, 136, 0.2))',
-            border: '2px solid var(--fox-ruby)',
-            boxShadow: '0 0 16px rgba(244, 63, 94, 0.4)',
-            cursor: 'pointer',
-            position: 'relative',
-            overflow: 'hidden',
-            padding: 0,
-          }}
-          title="Nhấn để trò chuyện cùng Hồ Ly"
-        >
-          <Image
-            src="/anime/mascot-transparent.png"
-            alt="Anime Mascot"
-            fill
-            style={{ objectFit: 'cover', objectPosition: 'top center', transform: 'scale(1.4) translateY(4px)' }}
-            priority
-          />
-        </button>
-
-        <button
-          onClick={toggleMinimize}
-          style={{
-            width: 28,
-            height: 28,
-            borderRadius: '50%',
-            background: 'var(--surface)',
-            border: '1px solid var(--border-color)',
-            color: 'var(--muted-fg)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          title="Mở rộng nhân vật"
-        >
-          <Maximize2 size={13} />
-        </button>
-      </div>
     );
   }
 
@@ -113,11 +50,10 @@ export function AnimeMascot() {
       case 'encourage':
         return 'rgba(251, 191, 36, 0.4)';
       default:
-        return 'rgba(244, 63, 94, 0.2)';
+        return 'rgba(244, 63, 94, 0.25)';
     }
   };
 
-  // Class animation theo cảm xúc
   const getAnimationClass = () => {
     switch (emotion) {
       case 'happy':
@@ -134,280 +70,267 @@ export function AnimeMascot() {
   };
 
   return (
-    <aside
-      aria-label="Trợ lý anime"
-      style={{
-        position: 'fixed',
-        bottom: 16,
-        right: 20,
-        zIndex: 998,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-end',
-        pointerEvents: 'none', // Cho phép click xuyên qua vùng trống
-      }}
-    >
-      {/* Bong bóng thoại (Speech Bubble) */}
-      {showBubble && message && (
-        <div
-          className="anime-bubble"
-          style={{
-            pointerEvents: 'auto',
-            maxWidth: 260,
-            marginBottom: 10,
-            padding: '12px 16px',
-            borderRadius: 18,
-            background: 'rgba(26, 35, 50, 0.92)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid var(--fox-ruby)',
-            boxShadow: `0 8px 30px ${getAuraColor()}, inset 0 1px 0 rgba(255, 255, 255, 0.1)`,
-            color: 'var(--fg)',
-            fontSize: 13,
-            lineHeight: 1.5,
-            position: 'relative',
-          }}
-        >
-          {/* Header mini của bong bóng */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 4,
-              fontSize: 11,
-              fontWeight: 700,
-              color: 'var(--fox-ruby)',
-            }}
-          >
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span>🦊</span> Bạch Hồ Ly
-            </span>
-            <div style={{ display: 'flex', gap: 4 }}>
-              <button
-                onClick={() => setShowBubble(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--muted)',
-                  cursor: 'pointer',
-                  fontSize: 10,
-                  padding: 2,
-                }}
-                title="Ẩn lời thoại"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-
-          <p style={{ margin: 0, color: 'var(--fg)' }}>{message}</p>
-
-          {/* Mũi tên bong bóng */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: -6,
-              right: 48,
-              width: 12,
-              height: 12,
-              background: 'rgba(26, 35, 50, 0.92)',
-              borderRight: '1px solid var(--fox-ruby)',
-              borderBottom: '1px solid var(--fox-ruby)',
-              transform: 'rotate(45deg)',
-            }}
-          />
-        </div>
-      )}
-
-      {/* Nhân vật Anime Fox Girl */}
+    <>
+      {/* 
+        ========================================================================
+        1. OMAMORI CHARM DOCK (Gắn sát mép phải màn hình, KHÔNG CHE BẤT CỨ NÚT NÀO)
+        - Cách xa đáy màn hình (> 120px) trên desktop
+        - Không chiếm diện tích hay chặn thanh điều hướng
+        ========================================================================
+      */}
       <div
+        className="anime-mascot-dock"
         style={{
-          position: 'relative',
+          position: 'fixed',
+          right: 0,
+          top: '42%',
+          transform: 'translateY(-50%)',
+          zIndex: 42,
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          pointerEvents: 'auto',
+          alignItems: 'flex-end',
         }}
       >
-        {/* Nút điều khiển tiện ích nhỏ góc trên */}
-        <div
+        {/* Nút bấm hình Bùa Hộ Mệnh Omamori Nhật Bản */}
+        <button
+          onClick={() => {
+            setIsOpen(!isOpen);
+            if (!isOpen) interact();
+          }}
+          className="anime-breathe"
           style={{
-            position: 'absolute',
-            top: -12,
-            right: 0,
+            padding: '10px 8px 12px 12px',
+            borderRadius: '16px 0 0 16px',
+            background: 'linear-gradient(135deg, rgba(225, 29, 72, 0.95) 0%, rgba(159, 18, 57, 0.92) 100%)',
+            borderTop: '1px solid rgba(251, 191, 36, 0.5)',
+            borderLeft: '1.5px solid rgba(251, 191, 36, 0.6)',
+            borderBottom: '1px solid rgba(251, 191, 36, 0.5)',
+            borderRight: 'none',
+            boxShadow: '-4px 6px 20px rgba(225, 29, 72, 0.4), inset 1px 1px 0 rgba(255,255,255,0.2)',
+            cursor: 'pointer',
             display: 'flex',
-            gap: 4,
-            opacity: 0.85,
-            zIndex: 10,
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 6,
+            color: '#fff',
+            transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}
+          title="Nhấn để trò chuyện cùng Bạch Hồ Ly"
         >
-          <button
-            onClick={() => setShowBubble(!showBubble)}
+          {/* Avatar mini tròn viền vàng */}
+          <div
             style={{
-              width: 24,
-              height: 24,
+              position: 'relative',
+              width: 34,
+              height: 34,
               borderRadius: '50%',
-              background: 'var(--surface)',
-              border: '1px solid var(--border-color)',
-              color: 'var(--muted-fg)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              border: '1.5px solid #fbbf24',
+              overflow: 'hidden',
+              background: '#0c1222',
+              boxShadow: '0 0 8px rgba(251, 191, 36, 0.5)',
             }}
-            title={showBubble ? 'Tắt bong bóng thoại' : 'Mở bong bóng thoại'}
           >
-            <MessageCircle size={11} />
-          </button>
-          <button
-            onClick={toggleMinimize}
-            style={{
-              width: 24,
-              height: 24,
-              borderRadius: '50%',
-              background: 'var(--surface)',
-              border: '1px solid var(--border-color)',
-              color: 'var(--muted-fg)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            title="Thu nhỏ nhân vật"
-          >
-            <Minimize2 size={11} />
-          </button>
-          <button
-            onClick={toggleVisibility}
-            style={{
-              width: 24,
-              height: 24,
-              borderRadius: '50%',
-              background: 'var(--surface)',
-              border: '1px solid var(--border-color)',
-              color: 'var(--muted-fg)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            title="Ẩn hoàn toàn nhân vật"
-          >
-            <EyeOff size={11} />
-          </button>
-        </div>
-
-        {/* Hào quang Fox Spirit Glow */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            width: 170,
-            height: 170,
-            borderRadius: '50%',
-            background: `radial-gradient(circle, ${getAuraColor()} 0%, transparent 70%)`,
-            filter: 'blur(16px)',
-            pointerEvents: 'none',
-            zIndex: 0,
-            transition: 'all 0.5s ease',
-          }}
-        />
-
-        {/* Cánh hoa anh đào rơi xung quanh khi vui */}
-        {(emotion === 'happy' || emotion === 'celebrate') && (
-          <div style={{ position: 'absolute', inset: -20, pointerEvents: 'none', zIndex: 5, overflow: 'hidden' }}>
-            <span style={{ position: 'absolute', left: '15%', top: '20%', fontSize: 16, animation: 'sakuraFloat 3s linear infinite' }}>🌸</span>
-            <span style={{ position: 'absolute', left: '65%', top: '10%', fontSize: 13, animation: 'sakuraFloat 2.6s linear infinite 0.5s' }}>✨</span>
-            <span style={{ position: 'absolute', left: '80%', top: '30%', fontSize: 15, animation: 'sakuraFloat 3.2s linear infinite 1s' }}>💖</span>
-            <span style={{ position: 'absolute', left: '35%', top: '5%', fontSize: 14, animation: 'sakuraFloat 2.8s linear infinite 1.5s' }}>🌸</span>
-          </div>
-        )}
-
-        {/* Đốm lửa ma trắc xanh ngọc khi idle/thinking */}
-        {(emotion === 'idle' || emotion === 'thinking') && (
-          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }}>
-            <div
-              style={{
-                position: 'absolute',
-                top: 30,
-                left: 10,
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                background: 'var(--fox-spirit)',
-                boxShadow: '0 0 12px var(--fox-spirit)',
-                animation: 'foxSpiritOrb 3s ease-in-out infinite',
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                top: 70,
-                right: 15,
-                width: 6,
-                height: 6,
-                borderRadius: '50%',
-                background: 'var(--fox-ruby)',
-                boxShadow: '0 0 10px var(--fox-ruby)',
-                animation: 'foxSpiritOrb 2.5s ease-in-out infinite 1.2s',
-              }}
+            <Image
+              src="/anime/mascot-transparent.png"
+              alt="Hồ Ly Avatar"
+              fill
+              sizes="34px"
+              style={{ objectFit: 'cover', objectPosition: 'top center', transform: 'scale(1.5) translateY(3px)' }}
             />
           </div>
-        )}
 
-        {/* Khung nhân vật có animation */}
-        <div
-          className={getAnimationClass()}
-          onClick={interact}
-          style={{
-            width: 175,
-            height: 220,
-            cursor: 'pointer',
-            position: 'relative',
-            zIndex: 2,
-            transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-            filter: `drop-shadow(0 8px 24px ${getAuraColor()})`,
-          }}
-          title="Bấm vào Bạch Hồ Ly để tương tác"
-        >
-          <Image
-            src="/anime/mascot-transparent.png"
-            alt="Bạch Hồ Ly Anime Companion"
-            fill
-            sizes="175px"
+          {/* Chữ Katakana dọc phong cách Nhật Bản */}
+          <div
             style={{
-              objectFit: 'contain',
-              objectPosition: 'bottom center',
-              userSelect: 'none',
-              pointerEvents: 'auto',
+              writingMode: 'vertical-rl',
+              fontSize: 10,
+              fontWeight: 800,
+              letterSpacing: '2px',
+              color: '#fff',
+              textShadow: '0 1px 2px rgba(0,0,0,0.6)',
+              fontFamily: 'var(--font-sans)',
             }}
-            priority
-          />
-        </div>
+          >
+            白狐 🏮 お守り
+          </div>
+        </button>
+      </div>
 
-        {/* Nhãn tên nhỏ dưới chân */}
+      {/* 
+        ========================================================================
+        2. COMPANION MODAL / POPUP CARD (Chỉ mở ra khi người dùng click vào bùa)
+        - Thiết kế như chiếc gương đền thần (Shinto Mirror Box)
+        - Tuyệt đối không tự động che chắn giao diện làm việc
+        ========================================================================
+      */}
+      {isOpen && (
         <div
-          onClick={interact}
+          className="modal-overlay"
+          onClick={() => setIsOpen(false)}
           style={{
-            marginTop: -6,
-            padding: '3px 10px',
-            borderRadius: 12,
-            background: 'rgba(26, 35, 50, 0.85)',
-            border: '1px solid var(--fox-ruby)',
-            color: 'var(--fg)',
-            fontSize: 10,
-            fontWeight: 700,
-            cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+            zIndex: 150, // Nằm trên modal thông thường để tương tác
             display: 'flex',
             alignItems: 'center',
-            gap: 4,
-            zIndex: 3,
+            justifyContent: 'center',
+            padding: 16,
           }}
         >
-          <span>🏮</span> Bạch Hồ Ly <Heart size={9} color="var(--fox-ruby)" fill="var(--fox-ruby)" />
+          <div
+            className="modal-content animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: 440,
+              width: '100%',
+              borderRadius: 24,
+              background: 'linear-gradient(135deg, rgba(17, 24, 39, 0.98) 0%, rgba(26, 35, 50, 0.96) 100%)',
+              border: '1.5px solid rgba(244, 63, 94, 0.4)',
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(244, 63, 94, 0.2)',
+              position: 'relative',
+              overflow: 'hidden',
+              padding: 0,
+            }}
+          >
+            {/* Header Thần Đạo Nhật Bản */}
+            <div
+              style={{
+                padding: '16px 20px',
+                borderBottom: '1px solid rgba(244, 63, 94, 0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                background: 'rgba(244, 63, 94, 0.08)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 18 }}>🏮</span>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: '#fff', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span>Bạch Hồ Ly Tiên Cô</span>
+                    <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 8, background: 'var(--fox-ruby)', color: 'white' }}>
+                      Online
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--muted-fg)' }}>
+                    「白狐の守護」 Thần thú đồng hành cùng bạn học tập
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsOpen(false)}
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: '50%',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid var(--border-color)',
+                  color: 'var(--muted-fg)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <X size={15} />
+              </button>
+            </div>
+
+            {/* Khung trưng bày nhân vật & lời thoại */}
+            <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+              {/* Đốm lửa ma trắc hồ ly */}
+              <div style={{ position: 'absolute', top: 20, left: 30, width: 8, height: 8, borderRadius: '50%', background: 'var(--fox-spirit)', boxShadow: '0 0 14px var(--fox-spirit)', animation: 'foxSpiritOrb 3s infinite' }} />
+              <div style={{ position: 'absolute', top: 60, right: 30, width: 7, height: 7, borderRadius: '50%', background: 'var(--fox-ruby)', boxShadow: '0 0 12px var(--fox-ruby)', animation: 'foxSpiritOrb 2.6s infinite 1s' }} />
+
+              {/* Nhân vật Bạch Hồ Ly lớn sắc nét */}
+              <div
+                className={getAnimationClass()}
+                onClick={interact}
+                style={{
+                  position: 'relative',
+                  width: 200,
+                  height: 240,
+                  cursor: 'pointer',
+                  filter: `drop-shadow(0 12px 28px ${getAuraColor()})`,
+                  transition: 'all 0.3s ease',
+                  marginBottom: 16,
+                }}
+                title="Bấm vào Hồ Ly để đổi câu thoại"
+              >
+                <Image
+                  src="/anime/mascot-transparent.png"
+                  alt="Bạch Hồ Ly Companion"
+                  fill
+                  sizes="200px"
+                  style={{ objectFit: 'contain', objectPosition: 'bottom center' }}
+                  priority
+                />
+              </div>
+
+              {/* Bong bóng thoại sang trọng */}
+              <div
+                className="anime-bubble"
+                style={{
+                  width: '100%',
+                  padding: '14px 18px',
+                  borderRadius: 16,
+                  background: 'rgba(15, 23, 42, 0.95)',
+                  border: '1px solid var(--fox-ruby)',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                  textAlign: 'center',
+                  position: 'relative',
+                  marginBottom: 16,
+                }}
+              >
+                <p style={{ fontSize: 13, color: '#f1f5f9', lineHeight: 1.6, margin: 0, fontStyle: 'italic' }}>
+                  &ldquo;{message}&rdquo;
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: 10, width: '100%' }}>
+                <button
+                  onClick={interact}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    padding: '10px 14px',
+                    borderRadius: 12,
+                    border: 'none',
+                    background: 'linear-gradient(135deg, var(--fox-crimson), #f43f5e)',
+                    color: 'white',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(225, 29, 72, 0.3)',
+                  }}
+                >
+                  <Sparkles size={14} />
+                  Trò chuyện cùng Hồ Ly
+                </button>
+
+                <button
+                  onClick={toggleVisibility}
+                  style={{
+                    padding: '10px 14px',
+                    borderRadius: 12,
+                    border: '1px solid var(--border-color)',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    color: 'var(--muted-fg)',
+                    fontSize: 12,
+                    cursor: 'pointer',
+                  }}
+                  title="Ẩn hoàn toàn nhân vật"
+                >
+                  Ẩn bùa
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </aside>
+      )}
+    </>
   );
 }

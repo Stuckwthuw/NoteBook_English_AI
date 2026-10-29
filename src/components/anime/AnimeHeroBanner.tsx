@@ -21,88 +21,82 @@ export function AnimeHeroBanner({ totalWords, masteredWords, needReviewWords }: 
       style={{
         position: 'relative',
         overflow: 'hidden',
-        padding: '24px 28px',
+        padding: '22px 24px',
         marginBottom: 24,
         borderRadius: 24,
-        background: 'linear-gradient(135deg, rgba(26, 35, 50, 0.95) 0%, rgba(30, 20, 35, 0.9) 100%)',
-        border: '1px solid rgba(244, 63, 94, 0.25)',
-        boxShadow: '0 8px 32px rgba(244, 63, 94, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+        background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 20, 35, 0.92) 100%)',
+        border: '1.5px solid rgba(244, 63, 94, 0.25)',
+        boxShadow: '0 12px 36px rgba(244, 63, 94, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
       }}
     >
       {/* Background Anime Aura Glow */}
       <div
         style={{
           position: 'absolute',
-          top: -40,
-          right: 40,
-          width: 260,
-          height: 260,
+          top: -30,
+          right: 20,
+          width: 220,
+          height: 220,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(244, 63, 94, 0.25) 0%, rgba(45, 212, 191, 0.15) 50%, transparent 70%)',
-          filter: 'blur(28px)',
+          background: 'radial-gradient(circle, rgba(244, 63, 94, 0.25) 0%, rgba(45, 212, 191, 0.12) 60%, transparent 70%)',
+          filter: 'blur(30px)',
           pointerEvents: 'none',
         }}
       />
-
-      {/* Floating Sakura Petals background */}
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-        <span style={{ position: 'absolute', top: 12, right: 280, fontSize: 18, animation: 'sakuraFloat 4s linear infinite', opacity: 0.6 }}>🌸</span>
-        <span style={{ position: 'absolute', top: 60, right: 80, fontSize: 14, animation: 'sakuraFloat 5s linear infinite 1.5s', opacity: 0.7 }}>🌸</span>
-        <span style={{ position: 'absolute', top: 110, right: 200, fontSize: 12, animation: 'sakuraFloat 3.8s linear infinite 0.8s', opacity: 0.5 }}>✨</span>
-      </div>
 
       <div
         style={{
           position: 'relative',
           zIndex: 2,
-          display: 'flex',
+          display: 'grid',
+          gridTemplateColumns: '1fr auto',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: 20,
+          gap: 16,
         }}
       >
-        {/* Left: Text & Actions */}
-        <div style={{ flex: '1 1 320px', maxWidth: 500 }}>
+        {/* Left Column: Greeting & Stats & Actions */}
+        <div style={{ minWidth: 0 }}>
+          {/* Badge Triện đỏ Thần Đạo Nhật Bản */}
           <div
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: 6,
-              padding: '4px 12px',
+              padding: '3px 10px',
               borderRadius: 20,
-              background: 'rgba(244, 63, 94, 0.12)',
-              border: '1px solid rgba(244, 63, 94, 0.3)',
+              background: 'rgba(244, 63, 94, 0.15)',
+              border: '1px solid rgba(244, 63, 94, 0.35)',
               color: 'var(--fox-ruby)',
-              fontSize: 12,
-              fontWeight: 700,
-              marginBottom: 10,
+              fontSize: 11,
+              fontWeight: 800,
+              marginBottom: 8,
+              letterSpacing: '0.5px',
             }}
           >
-            <span>🏮</span> Bạch Hồ Ly Đồng Hành
+            <span>🏮</span> 白狐の加護 • BẠCH HỒ LY ĐỒNG HÀNH
           </div>
 
           <h1
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: 26,
+              fontSize: 22,
               fontWeight: 800,
-              color: 'var(--fg)',
-              lineHeight: 1.3,
-              marginBottom: 8,
+              color: '#fff',
+              lineHeight: 1.25,
+              marginBottom: 6,
               letterSpacing: '-0.02em',
             }}
           >
-            Chào mừng trở lại, <span style={{ color: 'var(--fox-ruby)', textShadow: '0 0 16px rgba(244,63,94,0.4)' }}>Học giả!</span>
+            Chào mừng trở lại, <span style={{ color: 'var(--fox-ruby)', textShadow: '0 0 14px rgba(244,63,94,0.45)' }}>Học giả!</span>
           </h1>
 
-          <p style={{ fontSize: 13, color: 'var(--muted-fg)', lineHeight: 1.5, marginBottom: 16 }}>
-            Hôm nay bạn có <strong style={{ color: 'var(--fox-gold)' }}>{needReviewWords} từ cần ôn tập</strong> và{' '}
-            <strong style={{ color: 'var(--primary)' }}>{masteredWords} từ đã thuộc</strong> trong tổng số {totalWords} từ. Cùng thiếp rèn luyện phản xạ nhé!
+          <p style={{ fontSize: 12, color: 'var(--muted-fg)', lineHeight: 1.5, marginBottom: 14 }}>
+            Hôm nay có <strong style={{ color: 'var(--fox-gold)' }}>{needReviewWords} từ cần ôn tập</strong> và{' '}
+            <strong style={{ color: 'var(--primary)' }}>{masteredWords} từ đã thuộc</strong> trong tổng số {totalWords} từ.
           </p>
 
           {/* Action buttons */}
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <Link
               href="/review"
               style={{
@@ -110,18 +104,18 @@ export function AnimeHeroBanner({ totalWords, masteredWords, needReviewWords }: 
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 6,
-                padding: '10px 18px',
+                padding: '9px 16px',
                 borderRadius: 12,
                 background: 'linear-gradient(135deg, var(--fox-crimson), #f43f5e)',
                 color: 'white',
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: 700,
-                boxShadow: '0 4px 16px rgba(225, 29, 72, 0.3)',
+                boxShadow: '0 4px 14px rgba(225, 29, 72, 0.35)',
                 transition: 'all 0.2s',
               }}
             >
-              <Brain size={16} />
-              Ôn tập cùng Hồ Ly
+              <Brain size={14} />
+              Ôn tập ngay
             </Link>
 
             <Link
@@ -131,41 +125,52 @@ export function AnimeHeroBanner({ totalWords, masteredWords, needReviewWords }: 
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 6,
-                padding: '10px 16px',
+                padding: '9px 14px',
                 borderRadius: 12,
                 background: 'rgba(45, 212, 191, 0.1)',
                 border: '1px solid rgba(45, 212, 191, 0.3)',
                 color: 'var(--primary)',
-                fontSize: 13,
+                fontSize: 12,
                 fontWeight: 600,
                 transition: 'all 0.2s',
               }}
             >
-              <Search size={15} />
+              <Search size={14} />
               Tra từ AI
             </Link>
           </div>
         </div>
 
-        {/* Right: Anime Fox Girl Mascot */}
+        {/* Right Column: Nhân vật Bạch Hồ Ly trong Khung Thần Kính tròn mờ ảo */}
         <div
           onClick={interact}
           className="anime-breathe"
           style={{
             position: 'relative',
-            width: 170,
-            height: 200,
+            width: 95,
+            height: 110,
             cursor: 'pointer',
             flexShrink: 0,
-            filter: 'drop-shadow(0 10px 24px rgba(244, 63, 94, 0.35))',
+            filter: 'drop-shadow(0 6px 16px rgba(244, 63, 94, 0.35))',
           }}
           title="Nhấn để trò chuyện cùng Bạch Hồ Ly"
         >
+          {/* Vòng hào quang Thần Kính */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: -4,
+              borderRadius: '50%',
+              border: '1.5px dashed rgba(244, 63, 94, 0.4)',
+              animation: 'spin 20s linear infinite',
+              pointerEvents: 'none',
+            }}
+          />
           <Image
             src="/anime/mascot-transparent.png"
             alt="Bạch Hồ Ly"
             fill
-            sizes="170px"
+            sizes="95px"
             style={{ objectFit: 'contain', objectPosition: 'bottom center' }}
             priority
           />

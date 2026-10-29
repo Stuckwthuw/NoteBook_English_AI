@@ -342,23 +342,44 @@ export default function ReviewPage() {
               <div
                 className="flashcard-inner"
                 style={{
-                  background: 'var(--surface)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: 20,
+                  background: 'linear-gradient(135deg, rgba(26, 35, 50, 0.95) 0%, rgba(17, 24, 39, 0.95) 100%)',
+                  border: '1.5px solid rgba(244, 63, 94, 0.35)',
+                  borderRadius: 24,
+                  boxShadow: '0 12px 36px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
                 }}
               >
                 {/* Front */}
-                <div className="flashcard-front" style={{ background: 'var(--surface)' }}>
+                <div className="flashcard-front" style={{ background: 'transparent', position: 'relative' }}>
+                  {/* Katakana Talisman Badge */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 16,
+                      right: 18,
+                      fontSize: 10,
+                      fontWeight: 800,
+                      color: 'var(--fox-ruby)',
+                      padding: '2px 8px',
+                      borderRadius: 12,
+                      background: 'rgba(244, 63, 94, 0.12)',
+                      border: '1px solid rgba(244, 63, 94, 0.3)',
+                      letterSpacing: '1px',
+                    }}
+                  >
+                    「霊符・単語」
+                  </div>
+
                   <div style={{ marginBottom: 8 }}>
                     <CEFRBadge level={currentWord.cefrLevel} />
                   </div>
                   <h2
                     style={{
                       fontFamily: 'var(--font-display)',
-                      fontSize: 32,
+                      fontSize: 34,
                       fontWeight: 800,
                       color: 'var(--fg)',
                       marginBottom: 8,
+                      textShadow: '0 0 20px rgba(45, 212, 191, 0.25)',
                     }}
                   >
                     {currentWord.word}
@@ -651,14 +672,14 @@ export default function ReviewPage() {
       )}
 
       {/* Navigation & Action Buttons */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginTop: 8 }}>
         <button
           onClick={goPrev}
           title="Từ trước đó"
           style={{
-            width: 44,
-            height: 44,
-            borderRadius: 12,
+            width: 46,
+            height: 46,
+            borderRadius: 14,
             border: '1px solid var(--border-color)',
             background: 'var(--surface)',
             cursor: 'pointer',
@@ -666,6 +687,7 @@ export default function ReviewPage() {
             alignItems: 'center',
             justifyContent: 'center',
             color: 'var(--muted-fg)',
+            boxShadow: 'var(--card-shadow)',
           }}
         >
           <ChevronLeft size={20} />
@@ -676,18 +698,20 @@ export default function ReviewPage() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
-            padding: '12px 20px',
-            borderRadius: 12,
-            border: 'none',
-            background: 'var(--danger)15',
-            color: 'var(--danger)',
+            gap: 8,
+            padding: '13px 24px',
+            borderRadius: 14,
+            border: '1.5px solid rgba(244, 63, 94, 0.45)',
+            background: 'linear-gradient(135deg, rgba(225, 29, 72, 0.15) 0%, rgba(244, 63, 94, 0.25) 100%)',
+            color: 'var(--fox-ruby)',
             cursor: 'pointer',
             fontSize: 13,
-            fontWeight: 600,
+            fontWeight: 700,
+            boxShadow: '0 4px 16px rgba(244, 63, 94, 0.18)',
+            transition: 'all 0.2s',
           }}
         >
-          <XCircle size={16} />
+          <XCircle size={18} />
           Cần ôn lại
         </button>
 
@@ -696,18 +720,20 @@ export default function ReviewPage() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 6,
-            padding: '12px 20px',
-            borderRadius: 12,
-            border: 'none',
-            background: 'var(--success-color)15',
+            gap: 8,
+            padding: '13px 24px',
+            borderRadius: 14,
+            border: '1.5px solid rgba(34, 197, 94, 0.45)',
+            background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(45, 212, 191, 0.25) 100%)',
             color: 'var(--success-color)',
             cursor: 'pointer',
             fontSize: 13,
-            fontWeight: 600,
+            fontWeight: 700,
+            boxShadow: '0 4px 16px rgba(34, 197, 94, 0.18)',
+            transition: 'all 0.2s',
           }}
         >
-          <CheckCircle2 size={16} />
+          <CheckCircle2 size={18} />
           Đã thuộc
         </button>
 
@@ -715,9 +741,9 @@ export default function ReviewPage() {
           onClick={goNext}
           title="Từ tiếp theo"
           style={{
-            width: 44,
-            height: 44,
-            borderRadius: 12,
+            width: 46,
+            height: 46,
+            borderRadius: 14,
             border: '1px solid var(--border-color)',
             background: 'var(--surface)',
             cursor: 'pointer',
@@ -725,6 +751,7 @@ export default function ReviewPage() {
             alignItems: 'center',
             justifyContent: 'center',
             color: 'var(--muted-fg)',
+            boxShadow: 'var(--card-shadow)',
           }}
         >
           <ChevronRight size={20} />
@@ -732,7 +759,7 @@ export default function ReviewPage() {
       </div>
 
       {/* Progress Bar */}
-      <div style={{ marginTop: 20 }}>
+      <div style={{ marginTop: 24, paddingBottom: 48 }}>
         <div
           style={{
             display: 'flex',
