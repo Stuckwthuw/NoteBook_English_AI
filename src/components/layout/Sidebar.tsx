@@ -14,11 +14,11 @@ import {
 } from 'lucide-react';
 
 const navItems = [
-  { href: '/', label: 'Tổng quan', icon: LayoutDashboard },
-  { href: '/vocabulary', label: 'Sổ từ vựng', icon: BookOpen },
-  { href: '/lookup', label: 'Tra từ AI', icon: Search },
-  { href: '/review', label: 'Ôn tập', icon: Brain },
-  { href: '/settings', label: 'Cài đặt', icon: Settings },
+  { href: '/', label: 'Tổng quan', sub: '概要', icon: LayoutDashboard },
+  { href: '/vocabulary', label: 'Sổ từ vựng', sub: '単語帳', icon: BookOpen },
+  { href: '/lookup', label: 'Tra từ AI', sub: 'AI検索', icon: Search },
+  { href: '/review', label: 'Ôn tập', sub: '復習', icon: Brain },
+  { href: '/settings', label: 'Cài đặt', sub: '設定', icon: Settings },
 ];
 
 export function Sidebar() {
@@ -32,28 +32,28 @@ export function Sidebar() {
           <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div
               style={{
-                width: 36,
-                height: 36,
-                borderRadius: 10,
+                width: 38,
+                height: 38,
+                borderRadius: 12,
                 background: 'linear-gradient(135deg, #0d9488, #06b6d4)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 18,
+                boxShadow: '0 4px 14px rgba(13, 148, 136, 0.4)',
               }}
             >
               <Sparkles size={20} color="white" />
             </div>
             <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: 'var(--fg)' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 16, color: 'var(--fg)', letterSpacing: '-0.02em' }}>
                 Lexicon
               </div>
-              <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: -2 }}>Smart Notebook</div>
+              <div style={{ fontSize: 11, color: 'var(--fox-ruby)', fontWeight: 600 }}>「ノート」Smart AI</div>
             </div>
           </Link>
         </div>
 
-        <nav style={{ padding: '16px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <nav style={{ padding: '16px 12px', flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
           {navItems.map((item) => {
             const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
             return (
@@ -61,9 +61,30 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '10px 14px',
+                  borderRadius: 12,
+                  textDecoration: 'none',
+                  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                }}
               >
-                <item.icon size={18} />
-                <span>{item.label}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <item.icon size={18} style={{ color: isActive ? 'var(--primary)' : 'inherit' }} />
+                  <span style={{ fontSize: 13, fontWeight: isActive ? 700 : 500 }}>{item.label}</span>
+                </div>
+                <span
+                  style={{
+                    fontSize: 10,
+                    opacity: isActive ? 0.9 : 0.45,
+                    fontFamily: 'monospace',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  {item.sub}
+                </span>
               </Link>
             );
           })}

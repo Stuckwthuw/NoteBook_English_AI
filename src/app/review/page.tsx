@@ -27,6 +27,7 @@ import { getSettings } from '@/lib/storage';
 import type { PracticeMode, AppSettings } from '@/lib/types';
 import { DEFAULT_SETTINGS } from '@/lib/types';
 import { useMascot } from '@/context/MascotContext';
+import { triggerConfettiCelebration } from '@/lib/confetti';
 
 export default function ReviewPage() {
   const { words, markReviewed, loading } = useVocabulary();
@@ -79,6 +80,8 @@ export default function ReviewPage() {
 
   const handleMastered = async () => {
     if (currentWord) {
+      // Bùng nổ pháo hoa & cánh hoa Sakura ăn mừng khi thuộc từ!
+      triggerConfettiCelebration();
       triggerEmotion('celebrate', `🎉 Tuyệt vời! Bạn đã thuộc từ "${currentWord.word}" rồi! Tiếp tục phát huy nhé! 🏆🏮`, 5500);
       await markReviewed(currentWord.id, true);
       goNext();
@@ -94,6 +97,8 @@ export default function ReviewPage() {
   };
 
   const handlePracticeSuccess = () => {
+    // Bùng nổ pháo hoa khi hoàn thành bài thực hành xuất sắc!
+    triggerConfettiCelebration();
     triggerEmotion('happy', `✨ Xuất sắc! Bạn vừa hoàn thành bài tập cho từ "${currentWord?.word}" rất chuẩn! 🦊💖`, 5000);
     setAssistantPraise(
       `🎉 Xuất sắc! Bạn đã thực hành rất tốt từ "${currentWord?.word}". Hãy đánh dấu "Đã thuộc" để ghi nhận nhé!`
@@ -701,18 +706,20 @@ export default function ReviewPage() {
             gap: 8,
             padding: '13px 24px',
             borderRadius: 14,
-            border: '1.5px solid rgba(244, 63, 94, 0.45)',
-            background: 'linear-gradient(135deg, rgba(225, 29, 72, 0.15) 0%, rgba(244, 63, 94, 0.25) 100%)',
-            color: 'var(--fox-ruby)',
+            border: '1.5px solid rgba(244, 63, 94, 0.6)',
+            background: 'linear-gradient(135deg, rgba(225, 29, 72, 0.22) 0%, rgba(244, 63, 94, 0.32) 100%)',
+            color: '#fb7185',
             cursor: 'pointer',
             fontSize: 13,
             fontWeight: 700,
-            boxShadow: '0 4px 16px rgba(244, 63, 94, 0.18)',
-            transition: 'all 0.2s',
+            boxShadow: '0 6px 20px rgba(225, 29, 72, 0.35)',
+            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
+          className="hover:scale-105 active:scale-95"
+          title="Chưa nhớ - Sẽ xuất hiện lại trong lượt tới"
         >
           <XCircle size={18} />
-          Cần ôn lại
+          <span>Cần ôn lại</span>
         </button>
 
         <button
@@ -721,20 +728,22 @@ export default function ReviewPage() {
             display: 'flex',
             alignItems: 'center',
             gap: 8,
-            padding: '13px 24px',
+            padding: '13px 26px',
             borderRadius: 14,
-            border: '1.5px solid rgba(34, 197, 94, 0.45)',
-            background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(45, 212, 191, 0.25) 100%)',
-            color: 'var(--success-color)',
+            border: '1.5px solid rgba(74, 222, 128, 0.65)',
+            background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(45, 212, 191, 0.38) 100%)',
+            color: '#4ade80',
             cursor: 'pointer',
             fontSize: 13,
-            fontWeight: 700,
-            boxShadow: '0 4px 16px rgba(34, 197, 94, 0.18)',
-            transition: 'all 0.2s',
+            fontWeight: 800,
+            boxShadow: '0 6px 24px rgba(74, 222, 128, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
           }}
+          className="hover:scale-105 active:scale-95"
+          title="Bấm để đánh dấu đã thuộc — Kích hoạt pháo hoa bùng nổ ✨"
         >
-          <CheckCircle2 size={18} />
-          Đã thuộc
+          <CheckCircle2 size={18} style={{ filter: 'drop-shadow(0 0 6px rgba(74, 222, 128, 0.6))' }} />
+          <span>Đã thuộc ✨</span>
         </button>
 
         <button

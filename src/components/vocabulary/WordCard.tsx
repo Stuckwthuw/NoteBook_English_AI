@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import {
   ChevronDown,
-  ChevronUp,
   Trash2,
   CheckCircle2,
   Circle,
@@ -12,10 +11,13 @@ import {
   Layers,
   GitBranch,
   ArrowLeftRight,
+  Sparkles,
+  Link2,
 } from 'lucide-react';
 import type { VocabularyEntry } from '@/lib/types';
 import { CEFRBadge } from './CEFRBadge';
 import { PronunciationButton } from './PronunciationButton';
+import { triggerWordMasteredBurst } from '@/lib/confetti';
 
 interface WordCardProps {
   entry: VocabularyEntry;
@@ -28,35 +30,158 @@ interface WordCardProps {
 type TabType = 'contexts' | 'family' | 'synonyms' | 'collocations' | 'pitfalls';
 
 export function WordCard({ entry, onDelete, onToggleMastered, onUpdate, compact = false }: WordCardProps) {
-  const [expanded, setExpanded] = useState(!compact);
+  // MẶC ĐỊNH LUÔN THU GỌN để giao diện cực kỳ thoáng đãng, tinh tế, không rối mắt!
+  // Chỉ khi người dùng click vào thẻ mới bung nở toàn bộ thông tin chi tiết.
+  const [expanded, setExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('contexts');
   const [isEditingPOS, setIsEditingPOS] = useState(false);
 
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onToggleMastered) {
+      if (!entry.isMastered) {
+        // Kích hoạt pháo hoa hạt năng lượng bùng nổ ngay tại vị trí click!
+        triggerWordMasteredBurst(e);
+      }
+      onToggleMastered(entry.id);
+    }
+  };
+
   return (
     <div
-      className="glass-card animate-slide-up"
+      className={`cyber-word-card ${expanded ? 'expanded' : ''} ${entry.isMastered ? 'mastered' : ''}`}
       style={{
-        padding: compact ? 16 : 20,
-        cursor: compact ? 'pointer' : 'default',
+        borderRadius: 16,
+        overflow: 'hidden',
+        border: entry.isMastered
+          ? '1.5px solid rgba(74, 222, 128, 0.4)'
+          : expanded
+          ? '1.5px solid rgba(45, 212, 191, 0.5)'
+          : '1px solid rgba(255, 255, 255, 0.08)',
+        background: entry.isMastered
+          ? 'linear-gradient(135deg, rgba(16, 26, 24, 0.88) 0%, rgba(13, 20, 30, 0.92) 100%)'
+          : expanded
+          ? 'linear-gradient(135deg, rgba(17, 24, 39, 0.96) 0%, rgba(20, 30, 48, 0.94) 100%)'
+          : 'linear-gradient(135deg, rgba(17, 24, 39, 0.75) 0%, rgba(22, 30, 46, 0.72) 100%)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        boxShadow: entry.isMastered
+          ? '0 6px 20px rgba(74, 222, 128, 0.12), inset 0 1px 0 rgba(255,255,255,0.08)'
+          : expanded
+          ? '0 12px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(45, 212, 191, 0.15)'
+          : '0 4px 14px rgba(0, 0, 0, 0.25)',
+        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        cursor: 'pointer',
+        position: 'relative',
       }}
-      onClick={() => compact && setExpanded(!expanded)}
+      onClick={() => setExpanded(!expanded)}
     >
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <h3
+      {/* Viền sáng vi điểm phía trên khi thẻ mở rộng */}
+      {expanded && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: '10%',
+            right: '10%',
+            height: '2px',
+            background: 'linear-gradient(90deg, transparent, var(--primary), var(--fox-ruby), transparent)',
+            boxShadow: '0 0 10px var(--primary)',
+          }}
+        />
+      )}
+
+      {/* 
+        ========================================================================
+        1. SLEEK COMPACT ROW (Chỉ hiện: Checkbox + Từ vựng + Phiên âm + Loa + Badge)
+        - Chiều cao cực kỳ gọn gàng (~54px)
+        - Thoáng mắt, tinh tế, chuẩn giao diện từ điển hiện đại
+        ========================================================================
+      */}
+      <div
+        style={{
+          padding: '14px 18px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+        }}
+      >
+        {/* Left Group: Check + Word + IPA + Audio + Badges */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', flex: 1, minWidth: 0 }}>
+          {/* Nút check trạng thái Đã thuộc */}
+          {onToggleMastered && (
+            <button
+              onClick={handleToggle}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: 0,
+                display: 'flex',
+                alignItems: 'center',
+                color: entry.isMastered ? 'var(--success-color)' : 'var(--muted)',
+                transition: 'all 0.2s',
+                flexShrink: 0,
+              }}
+              title={entry.isMastered ? 'Bấm để đánh dấu cần ôn lại' : 'Bấm để đánh dấu đã thuộc (Bùng nổ pháo hoa ✨)'}
+            >
+              {entry.isMastered ? (
+                <CheckCircle2
+                  size={21}
+                  style={{
+                    color: '#4ade80',
+                    filter: 'drop-shadow(0 0 8px rgba(74, 222, 128, 0.6))',
+                  }}
+                />
+              ) : (
+                <Circle size={21} className="hover:text-teal-400" />
+              )}
+            </button>
+          )}
+
+          {/* Word & IPA */}
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+            <span
               style={{
                 fontFamily: 'var(--font-display)',
-                fontSize: compact ? 18 : 22,
+                fontSize: 18,
                 fontWeight: 700,
-                color: 'var(--fg)',
+                color: entry.isMastered ? '#4ade80' : '#f8fafc',
+                letterSpacing: '-0.01em',
+                lineHeight: 1.2,
+                textShadow: entry.isMastered
+                  ? '0 0 12px rgba(74, 222, 128, 0.4)'
+                  : expanded
+                  ? '0 0 10px rgba(45, 212, 191, 0.4)'
+                  : 'none',
               }}
             >
               {entry.word}
-            </h3>
-            <CEFRBadge level={entry.cefrLevel} size={compact ? 'sm' : 'md'} />
-            
+            </span>
+
+            {/* Phiên âm IPA nghiêng xám khói */}
+            <span
+              style={{
+                fontSize: 13,
+                color: 'var(--muted-fg)',
+                fontStyle: 'italic',
+                fontFamily: 'inherit',
+              }}
+            >
+              {entry.ipa}
+            </span>
+          </div>
+
+          {/* Nút phát âm âm thanh (bấm không làm nở/thu thẻ) */}
+          <div onClick={(e) => e.stopPropagation()}>
+            <PronunciationButton word={entry.word} compact={true} />
+          </div>
+
+          {/* Badges: CEFR & Part of Speech */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <CEFRBadge level={entry.cefrLevel} size="sm" />
+
             {isEditingPOS ? (
               <select
                 value={entry.partOfSpeech}
@@ -64,9 +189,7 @@ export function WordCard({ entry, onDelete, onToggleMastered, onUpdate, compact 
                 onChange={(e) => {
                   e.stopPropagation();
                   setIsEditingPOS(false);
-                  if (onUpdate) {
-                    onUpdate({ ...entry, partOfSpeech: e.target.value });
-                  }
+                  if (onUpdate) onUpdate({ ...entry, partOfSpeech: e.target.value });
                 }}
                 onBlur={() => setIsEditingPOS(false)}
                 autoFocus
@@ -79,15 +202,14 @@ export function WordCard({ entry, onDelete, onToggleMastered, onUpdate, compact 
                   border: '1px solid var(--primary)',
                   fontWeight: 600,
                   outline: 'none',
-                  cursor: 'pointer',
                 }}
               >
-                <option value="noun">noun (danh từ)</option>
-                <option value="verb">verb (động từ)</option>
-                <option value="adjective">adjective (tính từ)</option>
-                <option value="adverb">adverb (trạng từ)</option>
-                <option value="idiom">idiom (thành ngữ)</option>
-                <option value="phrase">phrase (cụm từ)</option>
+                <option value="noun">noun</option>
+                <option value="verb">verb</option>
+                <option value="adjective">adjective</option>
+                <option value="adverb">adverb</option>
+                <option value="idiom">idiom</option>
+                <option value="phrase">phrase</option>
               </select>
             ) : (
               <span
@@ -97,266 +219,269 @@ export function WordCard({ entry, onDelete, onToggleMastered, onUpdate, compact 
                     setIsEditingPOS(true);
                   }
                 }}
-                title={onUpdate ? 'Nhấp để sửa loại từ (Noun, Verb, Adj, Adv...)' : undefined}
                 style={{
                   fontSize: 11,
                   padding: '2px 8px',
-                  borderRadius: 6,
-                  background: 'var(--surface-alt)',
+                  borderRadius: 8,
+                  background: 'rgba(255, 255, 255, 0.05)',
                   color: 'var(--muted-fg)',
-                  fontWeight: 500,
-                  cursor: onUpdate ? 'pointer' : 'default',
-                  transition: 'all 0.2s',
-                  border: onUpdate ? '1px dashed var(--border-color)' : 'none',
+                  fontWeight: 600,
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  textTransform: 'lowercase',
                 }}
+                title={onUpdate ? 'Nhấn để sửa loại từ' : undefined}
               >
-                {entry.partOfSpeech} {onUpdate && '✎'}
-              </span>
-            )}
-
-            {entry.isMastered && (
-              <span style={{ fontSize: 11, color: 'var(--success-color)', fontWeight: 600 }}>
-                ✓ Đã thuộc
+                {entry.partOfSpeech}
               </span>
             )}
           </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 14, color: 'var(--muted-fg)', fontStyle: 'italic' }}>
-              {entry.ipa}
-            </span>
-            <PronunciationButton word={entry.word} compact={compact} />
-          </div>
-
-          <p style={{ fontSize: 14, color: 'var(--fg)', marginTop: 8, lineHeight: 1.5, whiteSpace: 'pre-line' }}>
-            <span style={{ color: 'var(--primary)', fontWeight: 600 }}>🇻🇳</span>{' '}
-            {entry.vietnameseMeaning}
-          </p>
-
-          {entry.register && (
-            <span
-              style={{
-                display: 'inline-block',
-                marginTop: 6,
-                fontSize: 11,
-                padding: '2px 8px',
-                borderRadius: 6,
-                background: 'var(--accent-soft)',
-                color: 'var(--accent)',
-                fontWeight: 500,
-              }}
-            >
-              {entry.register}
-            </span>
-          )}
         </div>
 
-        {/* Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          {onToggleMastered && (
-            <button
-              onClick={(e) => { e.stopPropagation(); onToggleMastered(entry.id); }}
-              style={{
-                padding: 6,
-                borderRadius: 8,
-                border: 'none',
-                background: 'transparent',
-                cursor: 'pointer',
-                color: entry.isMastered ? 'var(--success-color)' : 'var(--muted)',
-                transition: 'all 0.2s',
-              }}
-              title={entry.isMastered ? 'Đánh dấu chưa thuộc' : 'Đánh dấu đã thuộc'}
-            >
-              {entry.isMastered ? <CheckCircle2 size={20} /> : <Circle size={20} />}
-            </button>
-          )}
+        {/* Right Group: Action buttons & Expansion Chevron */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {onDelete && (
             <button
-              onClick={(e) => { e.stopPropagation(); onDelete(entry.id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (confirm(`Bạn có chắc muốn xóa từ "${entry.word}" khỏi sổ tay không?`)) {
+                  onDelete(entry.id);
+                }
+              }}
               style={{
-                padding: 6,
+                width: 30,
+                height: 30,
                 borderRadius: 8,
                 border: 'none',
                 background: 'transparent',
-                cursor: 'pointer',
                 color: 'var(--muted)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 transition: 'all 0.2s',
               }}
-              title="Xóa từ"
+              className="hover:text-red-400 hover:bg-red-500/10"
+              title="Xóa từ này"
             >
-              <Trash2 size={16} />
+              <Trash2 size={15} />
             </button>
           )}
-          {compact && (
-            <button
-              onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-              style={{
-                padding: 6,
-                borderRadius: 8,
-                border: 'none',
-                background: 'transparent',
-                cursor: 'pointer',
-                color: 'var(--muted)',
-              }}
-            >
-              {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            </button>
-          )}
+
+          {/* Mũi tên chỉ báo mở rộng mượt mà */}
+          <div
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: 8,
+              background: expanded ? 'rgba(45, 212, 191, 0.15)' : 'rgba(255, 255, 255, 0.04)',
+              border: expanded ? '1px solid var(--primary)' : '1px solid rgba(255, 255, 255, 0.08)',
+              color: expanded ? 'var(--primary)' : 'var(--muted-fg)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            }}
+          >
+            <ChevronDown size={15} />
+          </div>
         </div>
       </div>
 
-      {/* Expanded Content */}
+      {/* 
+        ========================================================================
+        2. EXPANDED FULL DETAILS (BÙNG NỔ KHI CLICK)
+        - Nghĩa tiếng Việt đầy đủ, định dạng số thứ tự rõ nét
+        - Bộ Tab: Ngữ cảnh, Họ từ, Đồng/Trái nghĩa, Collocations, Lưu ý
+        ========================================================================
+      */}
       {expanded && (
-        <div style={{ marginTop: 16, borderTop: '1px solid var(--border-light)', paddingTop: 16 }}>
-          {/* Tab Navigation */}
-          <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
-            {[
-              { key: 'contexts' as const, label: 'Ngữ cảnh', icon: BookOpen, count: entry.contexts?.length },
-              ...(entry.wordFamily && entry.wordFamily.length > 0
-                ? [{ key: 'family' as const, label: 'Gia đình từ', icon: GitBranch, count: entry.wordFamily.length }]
-                : []),
-              ...((entry.synonyms && entry.synonyms.length > 0) || (entry.antonyms && entry.antonyms.length > 0)
-                ? [{
-                    key: 'synonyms' as const,
-                    label: 'Đồng nghĩa & Trái nghĩa',
-                    icon: ArrowLeftRight,
-                    count: (entry.synonyms?.length || 0) + (entry.antonyms?.length || 0),
-                  }]
-                : []),
-              ...(entry.collocations && entry.collocations.length > 0
-                ? [{ key: 'collocations' as const, label: 'Collocations', icon: Layers, count: entry.collocations.length }]
-                : []),
-              ...(entry.commonPitfalls
-                ? [{ key: 'pitfalls' as const, label: 'Lưu ý', icon: AlertTriangle }]
-                : []),
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                onClick={(e) => { e.stopPropagation(); setActiveTab(tab.key); }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '6px 12px',
-                  borderRadius: 8,
-                  border: 'none',
-                  background: activeTab === tab.key ? 'var(--primary-soft)' : 'transparent',
-                  color: activeTab === tab.key ? 'var(--primary)' : 'var(--muted-fg)',
-                  cursor: 'pointer',
-                  fontSize: 12,
-                  fontWeight: activeTab === tab.key ? 600 : 500,
-                  transition: 'all 0.2s',
-                }}
-              >
-                <tab.icon size={13} />
-                <span>{tab.label}</span>
-                {tab.count !== undefined && tab.count > 0 && (
-                  <span
-                    style={{
-                      fontSize: 10,
-                      padding: '1px 5px',
-                      borderRadius: 10,
-                      background: activeTab === tab.key ? 'var(--primary)' : 'var(--surface-alt)',
-                      color: activeTab === tab.key ? 'white' : 'var(--muted-fg)',
-                      fontWeight: 600,
-                    }}
-                  >
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            ))}
+        <div
+          className="animate-slide-down"
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            padding: '0 18px 18px',
+            borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+            marginTop: 4,
+          }}
+        >
+          {/* Nghĩa tiếng Việt */}
+          <div
+            style={{
+              padding: '12px 16px',
+              borderRadius: 12,
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              marginTop: 14,
+              marginBottom: 16,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+              <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--primary)', letterSpacing: '0.5px' }}>
+                「意味」Ý NGHĨA CHI TIẾT
+              </span>
+            </div>
+            <p
+              style={{
+                fontSize: 14,
+                color: 'var(--fg)',
+                lineHeight: 1.6,
+                fontWeight: 500,
+                whiteSpace: 'pre-line',
+              }}
+            >
+              {entry.vietnameseMeaning}
+            </p>
           </div>
 
-          {/* Tab Content: Ngữ cảnh */}
-          {activeTab === 'contexts' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {entry.contexts.map((ctx, i) => (
-                <div
-                  key={i}
-                  style={{
-                    padding: 12,
-                    borderRadius: 10,
-                    background: 'var(--surface-alt)',
-                    border: '1px solid var(--border-light)',
-                  }}
-                >
-                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--primary)', marginBottom: 4 }}>
-                    📚 {ctx.domain}
-                  </div>
-                  <p style={{ fontSize: 13, color: 'var(--fg)', lineHeight: 1.5, fontStyle: 'italic' }}>
-                    &ldquo;{ctx.exampleSentence}&rdquo;
-                  </p>
-                  <p style={{ fontSize: 12, color: 'var(--muted-fg)', marginTop: 4 }}>
-                    → {ctx.sentenceMeaning}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
+          {/* Tab Navigation Pill Bar */}
+          <div
+            style={{
+              display: 'flex',
+              gap: 4,
+              overflowX: 'auto',
+              paddingBottom: 4,
+              marginBottom: 14,
+              borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+            }}
+          >
+            {[
+              { id: 'contexts' as TabType, label: 'Ngữ cảnh & Ví dụ', icon: BookOpen, count: entry.contexts?.length || 0 },
+              { id: 'family' as TabType, label: 'Họ từ', icon: GitBranch, count: entry.wordFamily?.length || 0 },
+              {
+                id: 'synonyms' as TabType,
+                label: 'Đồng / Trái nghĩa',
+                icon: ArrowLeftRight,
+                count: (entry.synonyms?.length || 0) + (entry.antonyms?.length || 0),
+              },
+              { id: 'collocations' as TabType, label: 'Collocations', icon: Link2, count: entry.collocations?.length || 0 },
+              { id: 'pitfalls' as TabType, label: 'Lưu ý', icon: AlertTriangle, count: entry.commonPitfalls ? 1 : 0 },
+            ].map((tab) => {
+              if (tab.count === 0 && tab.id !== 'contexts') return null;
+              const isActive = activeTab === tab.id;
+              const Icon = tab.icon;
 
-          {/* Tab Content: Gia đình từ (Word Family) */}
-          {activeTab === 'family' && entry.wordFamily && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
-              {entry.wordFamily.map((fam, idx) => (
-                <div
-                  key={idx}
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
                   style={{
-                    padding: '10px 12px',
-                    borderRadius: 10,
-                    background: 'var(--surface-alt)',
-                    border: '1px solid var(--border-light)',
                     display: 'flex',
-                    flexDirection: 'column',
-                    gap: 4,
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '6px 12px',
+                    borderRadius: 8,
+                    border: 'none',
+                    background: isActive ? 'rgba(45, 212, 191, 0.15)' : 'transparent',
+                    color: isActive ? 'var(--primary)' : 'var(--muted-fg)',
+                    fontSize: 12,
+                    fontWeight: isActive ? 700 : 500,
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.2s',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--fg)', fontFamily: 'var(--font-display)' }}>
-                      {fam.word}
-                    </span>
+                  <Icon size={13} />
+                  <span>{tab.label}</span>
+                  {tab.count > 0 && (
                     <span
                       style={{
                         fontSize: 10,
-                        fontWeight: 600,
-                        padding: '2px 6px',
+                        padding: '1px 5px',
                         borderRadius: 6,
-                        background: 'var(--primary-soft)',
-                        color: 'var(--primary)',
-                        textTransform: 'uppercase',
+                        background: isActive ? 'var(--primary)' : 'rgba(255, 255, 255, 0.06)',
+                        color: isActive ? '#0f172a' : 'var(--muted-fg)',
+                        fontWeight: 700,
                       }}
                     >
-                      {fam.partOfSpeech}
+                      {tab.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Tab 1: Contexts & Examples */}
+          {activeTab === 'contexts' && entry.contexts && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {entry.contexts.map((ctx, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    padding: 12,
+                    borderRadius: 10,
+                    background: 'rgba(255, 255, 255, 0.02)',
+                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <span
+                      style={{
+                        fontSize: 10,
+                        padding: '1px 6px',
+                        borderRadius: 6,
+                        background: 'rgba(45, 212, 191, 0.15)',
+                        color: 'var(--primary)',
+                        fontWeight: 700,
+                      }}
+                    >
+                      {ctx.domain}
                     </span>
                   </div>
-                  <p style={{ fontSize: 12, color: 'var(--muted-fg)', margin: 0, lineHeight: 1.4 }}>
-                    {fam.meaning}
-                  </p>
+                  <div style={{ fontSize: 13, color: '#f1f5f9', fontStyle: 'italic', marginBottom: 3 }}>
+                    &ldquo;{ctx.exampleSentence}&rdquo;
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--muted-fg)' }}>
+                    → {ctx.sentenceMeaning}
+                  </div>
                 </div>
               ))}
             </div>
           )}
 
-          {/* Tab Content: Đồng nghĩa & Trái nghĩa */}
+          {/* Tab 2: Word Family */}
+          {activeTab === 'family' && entry.wordFamily && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
+              {entry.wordFamily.map((item, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    padding: 10,
+                    borderRadius: 10,
+                    background: 'rgba(255, 255, 255, 0.02)',
+                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--fg)' }}>{item.word}</span>
+                    <span style={{ fontSize: 10, color: 'var(--primary)', fontWeight: 600 }}>{item.partOfSpeech}</span>
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--muted-fg)' }}>{item.meaning}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Tab 3: Synonyms & Antonyms */}
           {activeTab === 'synonyms' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {entry.synonyms && entry.synonyms.length > 0 && (
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: '#10b981', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span>🟢</span> Từ đồng nghĩa (Synonyms)
-                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#4ade80', display: 'block', marginBottom: 6 }}>
+                    🟢 Từ đồng nghĩa (Synonyms):
+                  </span>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {entry.synonyms.map((syn, idx) => (
                       <span
                         key={idx}
                         style={{
-                          padding: '5px 12px',
+                          fontSize: 12,
+                          padding: '3px 10px',
                           borderRadius: 8,
-                          background: 'rgba(16, 185, 129, 0.12)',
-                          border: '1px solid rgba(16, 185, 129, 0.3)',
-                          fontSize: 13,
-                          color: '#10b981',
-                          fontWeight: 500,
+                          background: 'rgba(74, 222, 128, 0.1)',
+                          color: '#4ade80',
+                          border: '1px solid rgba(74, 222, 128, 0.25)',
                         }}
                       >
                         {syn}
@@ -368,21 +493,20 @@ export function WordCard({ entry, onDelete, onToggleMastered, onUpdate, compact 
 
               {entry.antonyms && entry.antonyms.length > 0 && (
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: '#f43f5e', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span>🔴</span> Từ trái nghĩa (Antonyms)
-                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#f87171', display: 'block', marginBottom: 6 }}>
+                    🔴 Từ trái nghĩa (Antonyms):
+                  </span>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {entry.antonyms.map((ant, idx) => (
                       <span
                         key={idx}
                         style={{
-                          padding: '5px 12px',
+                          fontSize: 12,
+                          padding: '3px 10px',
                           borderRadius: 8,
-                          background: 'rgba(244, 63, 94, 0.12)',
-                          border: '1px solid rgba(244, 63, 94, 0.3)',
-                          fontSize: 13,
-                          color: '#f43f5e',
-                          fontWeight: 500,
+                          background: 'rgba(239, 68, 68, 0.1)',
+                          color: '#f87171',
+                          border: '1px solid rgba(239, 68, 68, 0.25)',
                         }}
                       >
                         {ant}
@@ -394,50 +518,65 @@ export function WordCard({ entry, onDelete, onToggleMastered, onUpdate, compact 
             </div>
           )}
 
-          {/* Tab Content: Collocations */}
-          {activeTab === 'collocations' && (
+          {/* Tab 4: Collocations */}
+          {activeTab === 'collocations' && entry.collocations && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {entry.collocations.map((col, i) => (
+              {entry.collocations.map((col, idx) => (
                 <span
-                  key={i}
+                  key={idx}
                   style={{
-                    padding: '5px 12px',
+                    fontSize: 12,
+                    padding: '4px 10px',
                     borderRadius: 8,
-                    background: 'var(--surface-alt)',
-                    border: '1px solid var(--border-light)',
-                    fontSize: 13,
-                    color: 'var(--fg)',
-                    fontWeight: 500,
+                    background: 'rgba(255, 255, 255, 0.04)',
+                    color: '#e2e8f0',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
                   }}
                 >
-                  {col}
+                  🔗 {col}
                 </span>
               ))}
             </div>
           )}
 
-          {/* Tab Content: Lưu ý */}
+          {/* Tab 5: Pitfalls */}
           {activeTab === 'pitfalls' && entry.commonPitfalls && (
             <div
               style={{
-                padding: 12,
-                borderRadius: 10,
-                background: 'var(--accent-soft)',
-                border: '1px solid var(--warning-color)30',
+                padding: '12px 14px',
+                borderRadius: 12,
+                background: 'rgba(245, 158, 11, 0.1)',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                color: '#fef3c7',
+                fontSize: 12,
+                lineHeight: 1.5,
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                <AlertTriangle size={14} style={{ color: 'var(--warning-color)' }} />
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--warning-color)' }}>
-                  Lưu ý thường gặp
-                </span>
-              </div>
-              <p style={{ fontSize: 13, color: 'var(--fg)', lineHeight: 1.5 }}>
-                {entry.commonPitfalls}
-              </p>
+              ⚠️ {entry.commonPitfalls}
             </div>
           )}
 
+          {/* Quick Collapse Button */}
+          <div style={{ textAlign: 'center', marginTop: 14 }}>
+            <button
+              onClick={() => setExpanded(false)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--muted)',
+                fontSize: 11,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+                padding: '4px 12px',
+                borderRadius: 8,
+              }}
+              className="hover:text-teal-400 hover:bg-teal-500/10"
+            >
+              ▲ Thu gọn chi tiết
+            </button>
+          </div>
         </div>
       )}
     </div>

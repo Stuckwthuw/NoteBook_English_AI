@@ -652,7 +652,8 @@ body {
     box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
   }
 
-  /* Ẩn mascot lớn đè lên thanh điều hướng trên mobile */
+  /* Ẩn mascot trên mobile để KHÔNG BAO GIỜ đè lên thanh điều hướng dưới đáy */
+  .anime-mascot-dock,
   .anime-mascot-desktop-dock {
     display: none !important;
   }

@@ -33,112 +33,221 @@ export default function DashboardPage() {
         needReviewWords={stats.needReview}
       />
 
-      {/* Quick Actions */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
+      {/* Quick Actions — Cyber Glass Bento Style */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 20 }}>
         <Link href="/lookup" style={{ textDecoration: 'none' }}>
           <div
-            className="glass-card"
+            className="glass-card hover-lift"
             style={{
-              padding: 18,
+              padding: '16px 18px',
               display: 'flex',
               alignItems: 'center',
               gap: 12,
               cursor: 'pointer',
+              borderRadius: 16,
+              background: 'linear-gradient(135deg, rgba(17, 24, 39, 0.75) 0%, rgba(20, 32, 48, 0.7) 100%)',
+              border: '1px solid rgba(45, 212, 191, 0.25)',
+              backdropFilter: 'blur(16px)',
+              transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
             <div
               style={{
-                width: 40,
-                height: 40,
+                width: 42,
+                height: 42,
                 borderRadius: 12,
-                background: 'linear-gradient(135deg, var(--primary), #06b6d4)',
+                background: 'linear-gradient(135deg, #0d9488, #06b6d4)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                boxShadow: '0 4px 14px rgba(13, 148, 136, 0.4)',
+                flexShrink: 0,
               }}
             >
               <Search size={20} color="white" />
             </div>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--fg)' }}>Tra từ AI</div>
-              <div style={{ fontSize: 11, color: 'var(--muted-fg)' }}>Phân tích nhanh</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#f8fafc', letterSpacing: '-0.01em' }}>Tra từ AI</div>
+              <div style={{ fontSize: 11, color: 'var(--primary)', marginTop: 1 }}>「検索」Phân tích ngữ cảnh</div>
             </div>
           </div>
         </Link>
 
         <Link href="/vocabulary" style={{ textDecoration: 'none' }}>
           <div
-            className="glass-card"
-            style={{ padding: 18, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
+            className="glass-card hover-lift"
+            style={{
+              padding: '16px 18px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              cursor: 'pointer',
+              borderRadius: 16,
+              background: 'linear-gradient(135deg, rgba(17, 24, 39, 0.75) 0%, rgba(30, 24, 48, 0.7) 100%)',
+              border: '1px solid rgba(168, 85, 247, 0.25)',
+              backdropFilter: 'blur(16px)',
+              transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+            }}
           >
             <div
               style={{
-                width: 40,
-                height: 40,
+                width: 42,
+                height: 42,
                 borderRadius: 12,
                 background: 'linear-gradient(135deg, #8b5cf6, #a78bfa)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                boxShadow: '0 4px 14px rgba(139, 92, 246, 0.4)',
+                flexShrink: 0,
               }}
             >
               <BookOpen size={20} color="white" />
             </div>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--fg)' }}>Sổ từ vựng</div>
-              <div style={{ fontSize: 11, color: 'var(--muted-fg)' }}>{stats.total} từ</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#f8fafc', letterSpacing: '-0.01em' }}>Sổ từ vựng</div>
+              <div style={{ fontSize: 11, color: '#c084fc', marginTop: 1 }}>「単語帳」{stats.total} mục từ</div>
             </div>
           </div>
         </Link>
 
         <Link href="/review" style={{ textDecoration: 'none' }}>
           <div
-            className="glass-card"
-            style={{ padding: 18, display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
+            className="glass-card hover-lift"
+            style={{
+              padding: '16px 18px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              cursor: 'pointer',
+              borderRadius: 16,
+              background: 'linear-gradient(135deg, rgba(17, 24, 39, 0.75) 0%, rgba(36, 24, 30, 0.7) 100%)',
+              border: '1px solid rgba(244, 63, 94, 0.25)',
+              backdropFilter: 'blur(16px)',
+              transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+            }}
           >
             <div
               style={{
-                width: 40,
-                height: 40,
+                width: 42,
+                height: 42,
                 borderRadius: 12,
-                background: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
+                background: 'linear-gradient(135deg, #f43f5e, #fb7185)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                boxShadow: '0 4px 14px rgba(244, 63, 94, 0.4)',
+                flexShrink: 0,
               }}
             >
               <Brain size={20} color="white" />
             </div>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--fg)' }}>Ôn tập</div>
-              <div style={{ fontSize: 11, color: 'var(--muted-fg)' }}>Flashcards</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#f8fafc', letterSpacing: '-0.01em' }}>Ôn tập</div>
+              <div style={{ fontSize: 11, color: 'var(--fox-ruby)', marginTop: 1 }}>「復習」{stats.needReview} từ cần luyện</div>
             </div>
           </div>
         </Link>
       </div>
 
-      {/* Stats Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 28 }}>
+      {/* 
+        ========================================================================
+        Cyber-Shrine Bento Glass Stats (Thay thế hoàn toàn 4 khối màu cục súc cũ!)
+        ========================================================================
+      */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 28 }}>
         {[
-          { label: 'Tổng từ vựng', value: stats.total, gradient: 'stat-gradient-1', icon: '📚' },
-          { label: 'Đã thuộc', value: stats.mastered, gradient: 'stat-gradient-2', icon: '✅' },
-          { label: 'Cần ôn', value: stats.needReview, gradient: 'stat-gradient-3', icon: '🔄' },
-          { label: 'Hôm nay', value: stats.todayAdded, gradient: 'stat-gradient-4', icon: '🆕' },
+          {
+            label: 'Tổng từ vựng',
+            kanji: '総語数',
+            value: stats.total,
+            icon: '📚',
+            accent: '#2dd4bf',
+            glow: 'rgba(45, 212, 191, 0.15)',
+            border: 'rgba(45, 212, 191, 0.3)',
+            bg: 'linear-gradient(135deg, rgba(13, 148, 136, 0.1) 0%, rgba(17, 24, 39, 0.85) 100%)',
+          },
+          {
+            label: 'Đã thuộc',
+            kanji: '習得済',
+            value: stats.mastered,
+            icon: '✨',
+            accent: '#4ade80',
+            glow: 'rgba(74, 222, 128, 0.15)',
+            border: 'rgba(74, 222, 128, 0.3)',
+            bg: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(17, 24, 39, 0.85) 100%)',
+          },
+          {
+            label: 'Cần ôn',
+            kanji: '復習要',
+            value: stats.needReview,
+            icon: '🔥',
+            accent: '#fbbf24',
+            glow: 'rgba(251, 191, 36, 0.15)',
+            border: 'rgba(251, 191, 36, 0.3)',
+            bg: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(17, 24, 39, 0.85) 100%)',
+          },
+          {
+            label: 'Hôm nay',
+            kanji: '新学習',
+            value: stats.todayAdded,
+            icon: '🌸',
+            accent: '#f43f5e',
+            glow: 'rgba(244, 63, 94, 0.15)',
+            border: 'rgba(244, 63, 94, 0.3)',
+            bg: 'linear-gradient(135deg, rgba(244, 63, 94, 0.1) 0%, rgba(17, 24, 39, 0.85) 100%)',
+          },
         ].map((stat, i) => (
           <div
             key={i}
-            className={`${stat.gradient} animate-slide-up stagger-item`}
+            className="animate-slide-up stagger-item"
             style={{
-              padding: 18,
-              borderRadius: 16,
-              color: 'white',
+              position: 'relative',
+              overflow: 'hidden',
+              padding: '16px 18px',
+              borderRadius: 18,
+              background: stat.bg,
+              border: `1px solid ${stat.border}`,
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              boxShadow: `0 8px 24px rgba(0, 0, 0, 0.25), 0 0 16px ${stat.glow}`,
+              transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
-            <div style={{ fontSize: 22, marginBottom: 6 }}>{stat.icon}</div>
-            <div style={{ fontSize: 28, fontWeight: 800, fontFamily: 'var(--font-display)' }}>
+            {/* Chữ Kanji Thần Thủy Mờ góc trên bên phải */}
+            <div
+              style={{
+                position: 'absolute',
+                top: 8,
+                right: 12,
+                fontSize: 10,
+                fontWeight: 800,
+                color: stat.accent,
+                opacity: 0.65,
+                letterSpacing: '1px',
+              }}
+            >
+              「{stat.kanji}」
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <span style={{ fontSize: 16 }}>{stat.icon}</span>
+              <span style={{ fontSize: 12, color: 'var(--muted-fg)', fontWeight: 600 }}>{stat.label}</span>
+            </div>
+
+            <div
+              style={{
+                fontSize: 30,
+                fontWeight: 800,
+                fontFamily: 'var(--font-display)',
+                color: stat.accent,
+                letterSpacing: '-0.02em',
+                lineHeight: 1,
+                textShadow: `0 0 16px ${stat.glow}`,
+              }}
+            >
               {loading ? '—' : stat.value}
             </div>
-            <div style={{ fontSize: 12, opacity: 0.9, marginTop: 2 }}>{stat.label}</div>
           </div>
         ))}
       </div>

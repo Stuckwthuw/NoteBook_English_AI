@@ -10,6 +10,7 @@ import { useToast } from '@/components/ui/Toast';
 import type { WordData, VocabularyEntry } from '@/lib/types';
 import { Save, Plus } from 'lucide-react';
 import { useMascot } from '@/context/MascotContext';
+import { triggerConfettiCelebration } from '@/lib/confetti';
 
 function LookupContent() {
   const searchParams = useSearchParams();
@@ -32,6 +33,7 @@ function LookupContent() {
     try {
       await addWord(lastResult);
       setSaved(true);
+      triggerConfettiCelebration(); // Bùng nổ pháo hoa hạt năng lượng chúc mừng đã thêm từ mới!
       toast(`"${lastResult.word}" đã lưu vào sổ tay!`, 'success');
       triggerEmotion('happy', `Tuyệt vời! Đã thêm "${lastResult.word}" vào sổ tay từ vựng! Nhớ ôn tập thường xuyên cùng thiếp nha! 🌸💖`, 5500);
     } catch {

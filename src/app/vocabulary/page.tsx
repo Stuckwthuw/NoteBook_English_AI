@@ -55,56 +55,84 @@ export default function VocabularyPage() {
   }, [words, searchQuery, filterCEFR, filterPOS, filterMastered, sortBy]);
 
   const selectStyle: React.CSSProperties = {
-    padding: '7px 10px',
-    borderRadius: 8,
-    border: '1px solid var(--border-color)',
-    background: 'var(--surface)',
-    color: 'var(--fg)',
+    padding: '8px 12px',
+    borderRadius: 10,
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    background: 'rgba(17, 24, 39, 0.8)',
+    color: '#e2e8f0',
     fontSize: 12,
+    fontWeight: 500,
     outline: 'none',
     cursor: 'pointer',
+    backdropFilter: 'blur(8px)',
+    transition: 'all 0.2s',
   };
 
   return (
     <div>
       <Header
         title="Sổ từ vựng"
-        subtitle={`${filteredWords.length} / ${words.length} từ`}
+        subtitle={`${filteredWords.length} / ${words.length} từ • Thu gọn tối giản, bấm để mở rộng`}
       />
 
-      {/* Search + Filters */}
+      {/* Search + Filters with Cyber Glass Styling */}
       <div
         className="glass-card animate-fade-in"
-        style={{ padding: 16, marginBottom: 20 }}
+        style={{
+          padding: '16px 18px',
+          marginBottom: 20,
+          borderRadius: 18,
+          background: 'linear-gradient(135deg, rgba(17, 24, 39, 0.75) 0%, rgba(24, 33, 47, 0.7) 100%)',
+          border: '1px solid rgba(45, 212, 191, 0.25)',
+          backdropFilter: 'blur(16px)',
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
+        }}
       >
         {/* Search Bar */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 8,
-            padding: '6px 12px',
-            borderRadius: 10,
-            border: '1px solid var(--border-color)',
-            background: 'var(--surface-alt)',
+            gap: 10,
+            padding: '8px 14px',
+            borderRadius: 12,
+            border: '1px solid rgba(45, 212, 191, 0.3)',
+            background: 'rgba(15, 23, 42, 0.85)',
             marginBottom: 12,
+            boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.4)',
+            transition: 'all 0.2s',
           }}
         >
-          <Search size={16} style={{ color: 'var(--muted)' }} />
+          <Search size={17} style={{ color: 'var(--primary)', flexShrink: 0 }} />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Tìm kiếm từ vựng..."
+            placeholder="Tìm kiếm từ vựng, nghĩa tiếng Việt... 「検索」"
             style={{
               flex: 1,
               border: 'none',
               outline: 'none',
               background: 'transparent',
-              fontSize: 14,
-              color: 'var(--fg)',
+              fontSize: 13,
+              color: '#f8fafc',
             }}
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--muted)',
+                cursor: 'pointer',
+                fontSize: 12,
+                padding: '2px 6px',
+              }}
+            >
+              ✕
+            </button>
+          )}
         </div>
 
         {/* Filter Row */}

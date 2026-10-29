@@ -79,7 +79,7 @@ export function AnimeMascot() {
         ========================================================================
       */}
       <div
-        className="anime-mascot-dock"
+        className="anime-mascot-dock anime-mascot-desktop-dock"
         style={{
           position: 'fixed',
           right: 0,
