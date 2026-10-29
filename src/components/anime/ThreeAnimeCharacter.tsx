@@ -8,20 +8,20 @@ interface ThreeAnimeCharacterProps {
   height?: number;
   interactive?: boolean;
   onInteract?: () => void;
-  priority?: boolean;
+  showOrbs?: boolean;
 }
 
 /**
- * ThreeAnimeCharacter — Trình kết xuất 3D WebGL Siêu Cấp cho Bạch Hồ Ly
- * - Sử dụng Three.js Vertex & Fragment Shader với Bản đồ Độ Sâu 3D (Z-Displacement Map)
- * - Tương tác 3D: Nghiêng đầu và mắt dõi theo con trỏ chuột trong không gian 3D thực tế
- * - Chu kỳ chớp mắt (Blink) và nháy mắt (Wink) mượt mà bằng WebGL Texture Blending
- * - Cánh hoa Sakura và Lửa Thần Thú (Kitsune-bi) bay lượn ở các tầng Z-depth khác nhau
- * - Ánh sáng động (Dynamic Specular & Rim Lighting)
+ * ThreeAnimeCharacter — Động cơ 3D WebGL Nâng Cấp Toàn Diện (AAA Quality)
+ * - Vật lý lò xo mượt mà (Spring-Damped 3D Parallax & Tilt): Chuyển động siêu êm, không hề bị khựng
+ * - Nháy mắt mượt mà bằng GLSL Eyelid Shader: Tự động nén mi mắt tự nhiên, KHÔNG dùng mảng màu giả
+ * - Dõi mắt theo chuột (Eye Gaze & Pupil Tracking) trong không gian 3D
+ * - Hạt hoa anh đào rơi 3D có chiều sâu không gian (Z-depth)
+ * - Khắc phục 100% tình trạng đốm màu lạ đè lên người & vệt mờ trên mặt
  */
 export function ThreeAnimeCharacter({
-  width = 240,
-  height = 290,
+  width = 250,
+  height = 300,
   interactive = true,
   onInteract,
 }: ThreeAnimeCharacterProps) {
@@ -29,33 +29,56 @@ export function ThreeAnimeCharacter({
   const [isWinking, setIsWinking] = useState(false);
   const [webGLError, setWebGLError] = useState(false);
 
-  // References to communicate with the render loop without re-triggering effects
-  const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 });
-  const blinkFactorRef = useRef(0);
-  const winkFactorRef = useRef(0);
+  // References to keep animation loop 60fps without React re-render lag
+  const mouseRef = useRef({ targetX: 0, targetY: 0 });
+  const springRef = useRef({
+    rotX: 0,
+    rotY: 0,
+    velX: 0,
+    velY: 0,
+  });
+
+  const blinkStateRef = useRef({
+    current: 0,
+    target: 0,
+    closing: false,
+  });
+
+  const winkStateRef = useRef({
+    current: 0,
+    target: 0,
+  });
+
   const isInteractingRef = useRef(false);
 
-  // Biological eye blinking loop
+  // 1. Chu kỳ chớp mắt sinh học siêu mượt (Smooth Biological Blink)
   const scheduleBlink = useCallback(() => {
-    const nextInterval = Math.random() * 2500 + 2800; // 2.8s to 5.3s
+    const nextInterval = Math.random() * 2600 + 2600; // 2.6s - 5.2s ngẫu nhiên
     return setTimeout(() => {
       const isDouble = Math.random() < 0.2;
-      blinkFactorRef.current = 1.0;
 
+      // Bắt đầu nhắm mi mắt (smooth transition)
+      blinkStateRef.current.target = 1.0;
+      blinkStateRef.current.closing = true;
+
+      // Sau 80ms bắt đầu mở ra
       setTimeout(() => {
-        blinkFactorRef.current = 0.0;
+        blinkStateRef.current.target = 0.0;
+        blinkStateRef.current.closing = false;
+
         if (isDouble) {
+          // Nhịp chớp mắt kép (Double-blink)
           setTimeout(() => {
-            blinkFactorRef.current = 1.0;
+            blinkStateRef.current.target = 1.0;
             setTimeout(() => {
-              blinkFactorRef.current = 0.0;
+              blinkStateRef.current.target = 0.0;
               scheduleBlink();
-            }, 110);
-          }, 90);
+            }, 90);
+          }, 80);
         } else {
           scheduleBlink();
         }
-      }, 130);
+      }, 90);
     }, nextInterval);
   }, []);
 
@@ -64,25 +87,27 @@ export function ThreeAnimeCharacter({
     return () => clearTimeout(timer);
   }, [scheduleBlink]);
 
-  // Click / Tap -> Wink in 3D
+  // 2. Tương tác nhấp chuột -> Nháy mắt tinh nghịch (Wink)
   const handleInteraction = () => {
     if (!interactive || isInteractingRef.current) return;
     isInteractingRef.current = true;
     setIsWinking(true);
-    winkFactorRef.current = 1.0;
+    winkStateRef.current.target = 1.0;
 
     setTimeout(() => {
-      winkFactorRef.current = 0.0;
-      setIsWinking(false);
-      isInteractingRef.current = false;
-    }, 800);
+      winkStateRef.current.target = 0.0;
+      setTimeout(() => {
+        setIsWinking(false);
+        isInteractingRef.current = false;
+      }, 200);
+    }, 750);
 
     if (onInteract) {
       onInteract();
     }
   };
 
-  // Main Three.js Scene Setup
+  // 3. Khởi tạo Three.js 3D WebGL Scene
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
@@ -95,7 +120,7 @@ export function ThreeAnimeCharacter({
         powerPreference: 'high-performance',
       });
     } catch (e) {
-      console.warn('WebGL initialization failed, falling back to 2D mode:', e);
+      console.warn('WebGL init failed:', e);
       setWebGLError(true);
       return;
     }
@@ -106,30 +131,26 @@ export function ThreeAnimeCharacter({
     container.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
-    camera.position.z = 3.6;
+    const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100);
+    camera.position.z = 3.5;
 
-    // Load Textures
+    // Load Texture Gốc (Pristine Original Artwork)
     const textureLoader = new THREE.TextureLoader();
-    const textureOpen = textureLoader.load('/anime/mascot-transparent.png');
-    const textureBlink = textureLoader.load('/anime/mascot-blink.png');
-    const textureWink = textureLoader.load('/anime/mascot-wink.png');
-    const depthMap = textureLoader.load('/anime/mascot-depth.png');
+    const charTexture = textureLoader.load('/anime/mascot-transparent.png');
+    charTexture.colorSpace = THREE.SRGBColorSpace;
+    charTexture.generateMipmaps = true;
+    charTexture.minFilter = THREE.LinearMipmapLinearFilter;
 
-    [textureOpen, textureBlink, textureWink, depthMap].forEach((tex) => {
-      tex.colorSpace = THREE.SRGBColorSpace;
-      tex.generateMipmaps = true;
-      tex.minFilter = THREE.LinearMipmapLinearFilter;
-    });
+    // Load Depth Map để phân tầng độ sâu Z
+    const depthTexture = textureLoader.load('/anime/mascot-depth.png');
+    depthTexture.colorSpace = THREE.SRGBColorSpace;
 
-    // Custom 3D Depth-Displaced Shader Material
-    const planeGeo = new THREE.PlaneGeometry(2.35, 2.7, 64, 64);
+    // 3D Plane Mesh với Shader biến dạng mi mắt & chiều sâu
+    const planeGeo = new THREE.PlaneGeometry(2.3, 2.65, 32, 32);
 
     const uniforms = {
-      uTextureOpen: { value: textureOpen },
-      uTextureBlink: { value: textureBlink },
-      uTextureWink: { value: textureWink },
-      uDepthMap: { value: depthMap },
+      uTexture: { value: charTexture },
+      uDepthMap: { value: depthTexture },
       uBlinkFactor: { value: 0.0 },
       uWinkFactor: { value: 0.0 },
       uMouse: { value: new THREE.Vector2(0, 0) },
@@ -137,9 +158,9 @@ export function ThreeAnimeCharacter({
     };
 
     const vertexShader = `
-      uniform sampler2D uDepthMap;
-      uniform vec2 uMouse;
       uniform float uTime;
+      uniform vec2 uMouse;
+      uniform sampler2D uDepthMap;
       varying vec2 vUv;
       varying float vDepth;
 
@@ -149,57 +170,92 @@ export function ThreeAnimeCharacter({
         vDepth = depth;
 
         vec3 newPos = position;
-        // 3D Depth displacement along Z axis (closer parts push forward)
-        newPos.z += depth * 0.42;
 
-        // Subtle organic breathing motion
-        float breath = sin(uTime * 2.2) * 0.02 * depth;
+        // Chiều sâu 3D mềm mại theo Z (nhẹ nhàng để không làm vỡ hình)
+        newPos.z += depth * 0.18;
+
+        // Hơi thở nhẹ nhàng tự nhiên ở ngực và vai
+        float breath = sin(uTime * 1.8) * 0.015 * depth;
         newPos.y += breath;
-        newPos.x += cos(uTime * 1.6) * 0.01 * depth;
 
         gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
       }
     `;
 
     const fragmentShader = `
-      uniform sampler2D uTextureOpen;
-      uniform sampler2D uTextureBlink;
-      uniform sampler2D uTextureWink;
-      uniform sampler2D uDepthMap;
+      uniform sampler2D uTexture;
       uniform float uBlinkFactor;
       uniform float uWinkFactor;
       uniform vec2 uMouse;
+      uniform float uTime;
       varying vec2 vUv;
       varying float vDepth;
 
       void main() {
-        // Parallax mapping: shift texture coordinate based on 3D gaze and depth
-        vec2 parallax = uMouse * (vDepth * 0.038);
-        vec2 uv = clamp(vUv + parallax, 0.001, 0.999);
+        vec2 uv = vUv;
 
-        vec4 colorOpen = texture2D(uTextureOpen, uv);
-        vec4 colorBlink = texture2D(uTextureBlink, uv);
-        vec4 colorWink = texture2D(uTextureWink, uv);
+        // Thị sai Parallax 3D siêu êm theo góc nhìn chuột
+        vec2 parallax = uMouse * (vDepth * 0.022);
+        uv = clamp(uv + parallax, 0.001, 0.999);
 
-        // Blend eye frames seamlessly in WebGL
-        vec4 baseColor = mix(colorOpen, colorBlink, clamp(uBlinkFactor, 0.0, 1.0));
-        baseColor = mix(baseColor, colorWink, clamp(uWinkFactor, 0.0, 1.0));
+        // ========================================================
+        // 1. Tọa độ chính xác vùng mắt trên ảnh (711 x 814)
+        // Mắt trái (người nhìn): center u=0.4754, v=0.7101
+        // Mắt phải (người nhìn): center u=0.5626, v=0.7101
+        // ========================================================
+        vec2 dL = vec2((uv.x - 0.4754) / 0.022, (uv.y - 0.7101) / 0.015);
+        float distL = length(dL);
 
-        if (baseColor.a < 0.02) discard;
+        vec2 dR = vec2((uv.x - 0.5626) / 0.024, (uv.y - 0.7101) / 0.015);
+        float distR = length(dR);
 
-        // Dynamic 3D lighting reflection following the cursor
-        vec2 lightDir = normalize(uMouse - (vUv - 0.5) * 2.0);
-        float rim = pow(vDepth, 2.0) * 0.12;
-        float spec = pow(max(0.0, 1.0 - length(uMouse * 1.4 - (vUv - 0.5) * 2.0)), 3.0) * vDepth * 0.25;
+        // ========================================================
+        // 2. Dõi mắt theo chuột (Eye Gaze Tracking)
+        // Con ngươi khẽ dịch chuyển theo con trỏ chuột trong không gian 3D!
+        // ========================================================
+        if (distL < 1.0) {
+          float gazeWeight = cos(distL * 1.5707963);
+          uv.x -= uMouse.x * 0.003 * gazeWeight;
+          uv.y -= uMouse.y * 0.002 * gazeWeight;
+        }
+        if (distR < 1.0) {
+          float gazeWeight = cos(distR * 1.5707963);
+          uv.x -= uMouse.x * 0.003 * gazeWeight;
+          uv.y -= uMouse.y * 0.002 * gazeWeight;
+        }
 
-        // Ambient Kitsune aura tint
-        vec3 finalRgb = baseColor.rgb + vec3(0.05, 0.02, 0.04) * rim + vec3(0.12, 0.08, 0.1) * spec;
+        // ========================================================
+        // 3. Khép mi mắt sinh học (Lattice Eyelid Squeeze)
+        // Nén trực tiếp UV về đường viền mi trên tự nhiên, 100% không dùng mảng màu xám giả!
+        // ========================================================
+        float blinkL = uBlinkFactor;
+        float blinkR = max(uBlinkFactor, uWinkFactor);
 
-        gl_FragColor = vec4(finalRgb, baseColor.a);
+        if (distL < 1.0 && blinkL > 0.001) {
+          float squeezeWeight = cos(distL * 1.5707963);
+          float amount = blinkL * squeezeWeight * 0.88;
+          // Nén tọa độ v về đường mí mắt
+          uv.y = mix(uv.y, 0.7135, amount);
+        }
+
+        if (distR < 1.0 && blinkR > 0.001) {
+          float squeezeWeight = cos(distR * 1.5707963);
+          float amount = blinkR * squeezeWeight * 0.88;
+          uv.y = mix(uv.y, 0.7135, amount);
+        }
+
+        vec4 col = texture2D(uTexture, uv);
+        if (col.a < 0.02) discard;
+
+        // Phản chiếu ánh sáng 3D động mềm mại trên gương mặt và tóc
+        float spec = pow(max(0.0, 1.0 - length(uMouse * 1.2 - (vUv - 0.5) * 2.0)), 2.8) * vDepth * 0.18;
+        col.rgb += vec3(0.08, 0.06, 0.08) * spec;
+
+        gl_FragColor = col;
       }
     `;
 
-    const characterMaterial = new THREE.ShaderMaterial({
+    const material = new THREE.ShaderMaterial({
       uniforms,
       vertexShader,
       fragmentShader,
@@ -207,48 +263,39 @@ export function ThreeAnimeCharacter({
       side: THREE.DoubleSide,
     });
 
-    const characterMesh = new THREE.Mesh(planeGeo, characterMaterial);
+    const characterMesh = new THREE.Mesh(planeGeo, material);
     scene.add(characterMesh);
 
-    // 3D Orbiting Kitsune Spirit Flame Orbs in World Space
-    const orbGeometry = new THREE.SphereGeometry(0.05, 16, 16);
-    const orbMat1 = new THREE.MeshBasicMaterial({ color: 0x2dd4bf });
-    const orbMat2 = new THREE.MeshBasicMaterial({ color: 0xf43f5e });
-
-    const orb1 = new THREE.Mesh(orbGeometry, orbMat1);
-    const orb2 = new THREE.Mesh(orbGeometry, orbMat2);
-    scene.add(orb1);
-    scene.add(orb2);
-
-    // 3D Sakura Petals Floating in Depth
-    const petalCount = 28;
+    // 4. Cánh hoa anh đào rơi 3D trong không gian thực
+    const petalCount = 26;
     const petalGeo = new THREE.BufferGeometry();
     const petalPositions = new Float32Array(petalCount * 3);
-    const petalVelocities: { x: number; y: number; z: number }[] = [];
+    const petalVels: { x: number; y: number; z: number }[] = [];
 
     for (let i = 0; i < petalCount; i++) {
-      petalPositions[i * 3] = (Math.random() - 0.5) * 3.5;
-      petalPositions[i * 3 + 1] = Math.random() * 3.5 - 1.5;
-      petalPositions[i * 3 + 2] = (Math.random() - 0.5) * 1.5;
-      petalVelocities.push({
-        x: (Math.random() - 0.5) * 0.008,
-        y: -(Math.random() * 0.012 + 0.008),
-        z: (Math.random() - 0.5) * 0.005,
+      petalPositions[i * 3] = (Math.random() - 0.5) * 3.2;
+      petalPositions[i * 3 + 1] = Math.random() * 3.2 - 1.6;
+      petalPositions[i * 3 + 2] = (Math.random() - 0.5) * 1.6;
+      petalVels.push({
+        x: (Math.random() - 0.5) * 0.006,
+        y: -(Math.random() * 0.01 + 0.006),
+        z: (Math.random() - 0.5) * 0.004,
       });
     }
 
     petalGeo.setAttribute('position', new THREE.BufferAttribute(petalPositions, 3));
     const petalMat = new THREE.PointsMaterial({
       color: 0xfb7185,
-      size: 0.045,
+      size: 0.042,
       transparent: true,
       opacity: 0.75,
       blending: THREE.AdditiveBlending,
+      depthWrite: false,
     });
     const petalSystem = new THREE.Points(petalGeo, petalMat);
     scene.add(petalSystem);
 
-    // Mouse / Touch Tracking Handlers
+    // 5. Xử lý chuột / chạm với độ trễ tự nhiên
     const handlePointerMove = (e: MouseEvent | TouchEvent) => {
       if (!interactive) return;
       const rect = container.getBoundingClientRect();
@@ -263,7 +310,7 @@ export function ThreeAnimeCharacter({
         clientY = e.clientY;
       }
 
-      // Normalized coordinates [-1, 1]
+      // Tọa độ chuẩn hóa [-1, 1]
       const nx = ((clientX - rect.left) / rect.width) * 2 - 1;
       const ny = -(((clientY - rect.top) / rect.height) * 2 - 1);
 
@@ -281,49 +328,58 @@ export function ThreeAnimeCharacter({
     container.addEventListener('touchmove', handlePointerMove, { passive: true });
     container.addEventListener('touchend', handlePointerLeave);
 
-    // Render Loop
+    // 6. Vòng lặp Render 60fps với Thuật Toán Vật Lý Lò Xo Damped Spring
     let animationFrameId: number;
-    let clock = new THREE.Clock();
+    const clock = new THREE.Clock();
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
-      const elapsedTime = clock.getElapsedTime();
+      const elapsed = clock.getElapsedTime();
 
-      // Smooth mouse lerping
-      mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * 0.08;
-      mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * 0.08;
+      // Damped harmonic oscillator physics for 3D tilt
+      const spring = 0.07;
+      const damping = 0.82;
 
-      // 3D Mesh Rotation & Head Tilt towards cursor
-      characterMesh.rotation.y = mouseRef.current.x * 0.28;
-      characterMesh.rotation.x = -mouseRef.current.y * 0.2;
+      const targetRotY = mouseRef.current.targetX * 0.22;
+      const targetRotX = -mouseRef.current.targetY * 0.16;
 
-      // Update Shader Uniforms
-      uniforms.uTime.value = elapsedTime;
-      uniforms.uMouse.value.set(mouseRef.current.x, mouseRef.current.y);
-      uniforms.uBlinkFactor.value += (blinkFactorRef.current - uniforms.uBlinkFactor.value) * 0.35;
-      uniforms.uWinkFactor.value += (winkFactorRef.current - uniforms.uWinkFactor.value) * 0.25;
+      springRef.current.velY += (targetRotY - springRef.current.rotY) * spring;
+      springRef.current.velX += (targetRotX - springRef.current.rotX) * spring;
 
-      // Orbiting Spirit Flame Orbs in 3D
-      const orbRadius = 1.35;
-      orb1.position.x = Math.cos(elapsedTime * 1.5) * orbRadius;
-      orb1.position.z = Math.sin(elapsedTime * 1.5) * 0.6 + 0.2;
-      orb1.position.y = Math.sin(elapsedTime * 2.2) * 0.35 + 0.1;
+      springRef.current.velY *= damping;
+      springRef.current.velX *= damping;
 
-      orb2.position.x = Math.cos(elapsedTime * 1.2 + Math.PI) * orbRadius;
-      orb2.position.z = Math.sin(elapsedTime * 1.2 + Math.PI) * 0.6 + 0.2;
-      orb2.position.y = Math.cos(elapsedTime * 1.8) * 0.35 - 0.2;
+      springRef.current.rotY += springRef.current.velY;
+      springRef.current.rotX += springRef.current.velX;
 
-      // Update 3D Sakura Petals
+      // Áp dụng góc nghiêng 3D thực tế
+      characterMesh.rotation.y = springRef.current.rotY;
+      characterMesh.rotation.x = springRef.current.rotX;
+
+      // Cập nhật giá trị Uniforms
+      uniforms.uTime.value = elapsed;
+      uniforms.uMouse.value.set(springRef.current.rotY * 4.0, springRef.current.rotX * 4.0);
+
+      // Nội suy mượt mà độ khép mi mắt
+      const blinkDiff = blinkStateRef.current.target - blinkStateRef.current.current;
+      blinkStateRef.current.current += blinkDiff * 0.32;
+      uniforms.uBlinkFactor.value = blinkStateRef.current.current;
+
+      // Nội suy độ nháy mắt Wink
+      const winkDiff = winkStateRef.current.target - winkStateRef.current.current;
+      winkStateRef.current.current += winkDiff * 0.25;
+      uniforms.uWinkFactor.value = winkStateRef.current.current;
+
+      // Cập nhật vị trí hoa anh đào 3D
       const positions = petalGeo.attributes.position.array as Float32Array;
       for (let i = 0; i < petalCount; i++) {
-        positions[i * 3] += petalVelocities[i].x;
-        positions[i * 3 + 1] += petalVelocities[i].y;
-        positions[i * 3 + 2] += petalVelocities[i].z;
+        positions[i * 3] += petalVels[i].x;
+        positions[i * 3 + 1] += petalVels[i].y;
+        positions[i * 3 + 2] += petalVels[i].z;
 
-        // Reset if fell below bottom
-        if (positions[i * 3 + 1] < -1.8) {
-          positions[i * 3 + 1] = 1.8;
-          positions[i * 3] = (Math.random() - 0.5) * 3.5;
+        if (positions[i * 3 + 1] < -1.7) {
+          positions[i * 3 + 1] = 1.7;
+          positions[i * 3] = (Math.random() - 0.5) * 3.2;
         }
       }
       petalGeo.attributes.position.needsUpdate = true;
@@ -333,7 +389,6 @@ export function ThreeAnimeCharacter({
 
     animate();
 
-    // Cleanup on unmount
     return () => {
       cancelAnimationFrame(animationFrameId);
       container.removeEventListener('mousemove', handlePointerMove);
@@ -345,10 +400,9 @@ export function ThreeAnimeCharacter({
       }
       renderer.dispose();
       planeGeo.dispose();
-      characterMaterial.dispose();
-      orbGeometry.dispose();
-      orbMat1.dispose();
-      orbMat2.dispose();
+      material.dispose();
+      charTexture.dispose();
+      depthTexture.dispose();
       petalGeo.dispose();
       petalMat.dispose();
     };
@@ -358,7 +412,7 @@ export function ThreeAnimeCharacter({
     return (
       <div style={{ width, height, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <img
-          src={isWinking ? '/anime/mascot-wink.png' : '/anime/mascot-transparent.png'}
+          src="/anime/mascot-transparent.png"
           alt="Bạch Hồ Ly"
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
         />
@@ -375,20 +429,23 @@ export function ThreeAnimeCharacter({
         height,
         cursor: interactive ? 'pointer' : 'default',
         userSelect: 'none',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
-      title={interactive ? 'Dê chuột để xoay 3D • Nhấp để Bạch Hồ Ly nháy mắt (Wink ✨)' : undefined}
+      title={interactive ? 'Dê chuột để nghiêng đầu 3D • Nhấp để Bạch Hồ Ly nháy mắt Wink! ✨' : undefined}
     >
-      {/* Three.js 3D Canvas Mount Point */}
+      {/* Three.js 3D WebGL Canvas */}
       <div ref={mountRef} style={{ width: '100%', height: '100%' }} />
 
-      {/* Floating Love Heart on 3D Wink */}
+      {/* Trái tim bay lên khi nháy mắt Wink */}
       {isWinking && (
         <div
           style={{
             position: 'absolute',
-            top: '18%',
-            right: '18%',
-            fontSize: 26,
+            top: '20%',
+            right: '16%',
+            fontSize: 24,
             filter: 'drop-shadow(0 0 10px rgba(244,63,94,0.9))',
             pointerEvents: 'none',
             animation: 'slideUpFade 0.75s forwards',

@@ -245,7 +245,27 @@ export function AnimeMascot() {
             {/* Khung trưng bày nhân vật 3D WebGL & lời thoại */}
             <div style={{ padding: '20px 20px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
               {/* Nhân vật Bạch Hồ Ly 3D WebGL (Độ sâu Z-depth, Nghiêng đầu theo chuột, Chớp mắt & Nháy mắt) */}
-              <div style={{ marginBottom: 14 }}>
+              <div
+                style={{
+                  position: 'relative',
+                  marginBottom: 14,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {/* Vòng Thần Kính Shinto phát quang mềm mại */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    width: 250,
+                    height: 250,
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle, rgba(244, 63, 94, 0.15) 0%, rgba(45, 212, 191, 0.06) 55%, transparent 70%)',
+                    filter: 'blur(16px)',
+                    pointerEvents: 'none',
+                  }}
+                />
                 <ThreeAnimeCharacter
                   width={240}
                   height={280}
